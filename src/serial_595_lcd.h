@@ -14,11 +14,10 @@
  * We store these together so we can have more than one display.
  */
 struct serial_lcd {
-    int pin_ser;
-    int pin_srclk;
-    int pin_rclk;
-    volatile int data; // the byte value representing the pin state on the 74HC595
-    
+    int pin_ser;        // the pin number on the Arduino that connects to SER (pin 14 of the 74HC595)
+    int pin_srclk;      // the pin number on the Arduino that connects to the SRCLK (pin 11 on the 74HC595)
+    int pin_rclk;       // the pin number on the Arduino that connects to the RCLK (pin 12 on the 74HC595)
+    volatile int data;  // the byte value representing the pin state on the 74HC595
 };
 
 // Turns the LCD on. The power pin of the LCD is wired to an output of the 74HC595 in this case.

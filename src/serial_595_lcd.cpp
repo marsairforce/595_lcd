@@ -128,7 +128,7 @@ void lcd_puts(serial_lcd *lcd, char *str) {
 
 void lcd_clear(serial_lcd *lcd) {
   lcd_write(lcd, 0, 0x01);
-  delay(2);
+  delay(1);
 }
 
 // Set DDRAM address in address counter
