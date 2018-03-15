@@ -11,6 +11,8 @@ void lcd_port_write(serial_lcd *lcd) {
   digitalWrite(lcd->pin_rclk, LOW);
   shiftOut(lcd->pin_ser, lcd->pin_srclk, LSBFIRST, lcd->data);
   digitalWrite(lcd->pin_rclk, HIGH);
+  digitalWrite(lcd->pin_rclk, LOW);
+  digitalWrite(lcd->pin_ser, LOW);
 }
 
 void lcd_on(serial_lcd *lcd) {
