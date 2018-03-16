@@ -18,7 +18,7 @@ void lcd_port_write(serial_lcd *lcd) {
 void lcd_on(serial_lcd *lcd) {
   set_bit(&lcd->data, LCD_POWER);
   lcd_port_write(lcd);
-  delay(5); // we do require a bit more time after power up before we start to initialize this.
+  delay(20); // we do require a bit more time after power up before we start to initialize this.
   lcd_initialize(lcd);
   lcd_backlight_on(lcd);
 }
@@ -122,7 +122,7 @@ void lcd_write(serial_lcd *lcd, int RS, int data) {
   clear_bit(&lcd->data, LCD_E);
   lcd_port_write(lcd);
   
-  delayMicroseconds(53);
+  delayMicroseconds(100);
 }
 
 
@@ -134,7 +134,7 @@ void lcd_initialize(serial_lcd *lcd) {
   lcd_write_nibble(lcd, 0, 0x3);  // function set [ 0 0 1 DL N 0 * * ] ; DL=1 for 8 bit mode, 0 for 4 bit mode ; N=1 for 16:1 mux, 8 for 8:1
   delayMicroseconds(4500);
   lcd_port_toggle_e(lcd); // toggle E 2 more times (pass the function set value again twice more basically)
-  delayMicroseconds(150);
+  delayMicroseconds(100);
   lcd_port_toggle_e(lcd);
   delayMicroseconds(100);
   lcd_write_nibble(lcd, 0, 0x2); // Function set (Set interface to 4 bits)
