@@ -91,53 +91,18 @@ void lcd_clear(serial_lcd *lcd) {
 }
 ```
 
-Where lcd_write invokes two nibble write operations:
-```
-void lcd_write(serial_lcd *lcd, int RS, int data) {
-  lcd_write_nibble(lcd, RS, (data & 0xF0) >> 4);
-  lcd_write_nibble(lcd, RS, (data & 0x0F) );
-}
-```
+Where lcd_write invokes two nibble write operations. But we have refactored the lcd_write_nibble to remove one cycle of loading the shift register.
+So this is now done in 5 cycles. The original was 8.
 
-Where each nibble operation translates to (4) writes to the 74HC595 shift register
-```
-void lcd_write_nibble(serial_lcd *lcd, int RS, int data) {
-  // see the write timing diagram
-
-  // set up RS, Make sure E is LOW
-  clear_bit(&lcd->data, LCD_E | LCD_RS);
-  if (RS) {
-    set_bit(&lcd->data, LCD_RS);
-  }
-  lcd_port_write(lcd);
-
-  // toggle E to HIGH
-  set_bit(&lcd->data, LCD_E);
-  lcd_port_write(lcd);
-
-  // set the data. Make sure just the lower 8 bits get changed.
-  clear_bit(&lcd->data, LCD_DATA);
-  lcd->data |= (data & LCD_DATA);
-  lcd_port_write(lcd);
-
-  // toggle E to LOW. This causes the data to be written to the LCD.
-  clear_bit(&lcd->data, LCD_E);
-  lcd_port_write(lcd);
-}
-```
 
 (Where this low level port write is just digitalWrite and shiftOut opertions):
 ```
 void lcd_port_write(serial_lcd *lcd) {
-  digitalWrite(lcd->pin_rclk, LOW);
   shiftOut(lcd->pin_ser, lcd->pin_srclk, LSBFIRST, lcd->data);
   digitalWrite(lcd->pin_rclk, HIGH);
   digitalWrite(lcd->pin_rclk, LOW);
-  digitalWrite(lcd->pin_ser, LOW);
 }
 ```
-
-Clearly there is some room for optimization in the lcd_write() function, as we could reduce the number of 'frames' we send to the 74HC595 if we wanted to. But as it is now this takes only about 1ms to send a command.  In this case of the clear screen, we need to do a small delay after we do the operation to allow the display to do its work. So its not like there is a need to optimize for time here.
 
 ### A note about 8 bit parallel mode
 Here we are using the 4 bit parallel mode, because it requires fewer pins from the shift register. We require at least of 2 control pins, so if we used 8 bit data mode we

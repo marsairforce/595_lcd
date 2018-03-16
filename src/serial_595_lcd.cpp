@@ -8,9 +8,9 @@
 * Write the raw data to the LCD port shift register.
 */
 void lcd_port_write(serial_lcd *lcd) {
-  digitalWrite(lcd->pin_rclk, LOW);
   shiftOut(lcd->pin_ser, lcd->pin_srclk, LSBFIRST, lcd->data);
   digitalWrite(lcd->pin_rclk, HIGH);
+//  delayMicroseconds(5);
   digitalWrite(lcd->pin_rclk, LOW);
   digitalWrite(lcd->pin_ser, LOW);
 }
@@ -18,6 +18,7 @@ void lcd_port_write(serial_lcd *lcd) {
 void lcd_on(serial_lcd *lcd) {
   set_bit(&lcd->data, LCD_POWER);
   lcd_port_write(lcd);
+  delay(5); // we do require a bit more time after power up before we start to initialize this.
   lcd_initialize(lcd);
   lcd_backlight_on(lcd);
 }
@@ -49,64 +50,100 @@ void lcd_toggle_backlight(serial_lcd *lcd) {
   }
 }
 
+void lcd_port_toggle_e(serial_lcd *lcd) {
+  // clear_bit(&lcd->data, LCD_E);
+  // lcd_port_write(lcd);
+  // delayMicroseconds(5);
+  set_bit(&lcd->data, LCD_E);
+  lcd_port_write(lcd);
+  delayMicroseconds(5);
+  clear_bit(&lcd->data, LCD_E);
+  lcd_port_write(lcd);
+}
+
 // writes 4 bits
 void lcd_write_nibble(serial_lcd *lcd, int RS, int data) {
   // see the write timing diagram
 
-  // set up RS, Make sure E is LOW
-  clear_bit(&lcd->data, LCD_E | LCD_RS);
+  // set up RS
   if (RS) {
     set_bit(&lcd->data, LCD_RS);
+  } else {
+    clear_bit(&lcd->data, LCD_RS);
   }
-  lcd_port_write(lcd);
-
-  // toggle E to HIGH
-  set_bit(&lcd->data, LCD_E);
-  lcd_port_write(lcd);
-
+  
   // set the data. Make sure just the lower 8 bits get changed.
   clear_bit(&lcd->data, LCD_DATA);
   lcd->data |= (data & LCD_DATA);
   lcd_port_write(lcd);
 
+  // set E to high
+  set_bit(&lcd->data, LCD_E);
+  lcd_port_write(lcd);
+  
   // toggle E to LOW. This causes the data to be written to the LCD.
   clear_bit(&lcd->data, LCD_E);
   lcd_port_write(lcd);
 }
 
 void lcd_write(serial_lcd *lcd, int RS, int data) {
-  lcd_write_nibble(lcd, RS, (data & 0xF0) >> 4);
-  lcd_write_nibble(lcd, RS, (data & 0x0F) );
-}
+  // set up RS
+  if (RS) {
+    set_bit(&lcd->data, LCD_RS);
+  } else {
+    clear_bit(&lcd->data, LCD_RS);
+  }
 
-void lcd_port_toggle_e(serial_lcd *lcd) {
-  // toggle E to HIGH
+  // set E to high
   set_bit(&lcd->data, LCD_E);
   lcd_port_write(lcd);
-  delay(1);
+  
+  // set the data. Make sure just the lower 8 bits get changed.
+  clear_bit(&lcd->data, LCD_DATA);
+  lcd->data |= (((data & 0xF0) >> 4) & LCD_DATA);
+  lcd_port_write(lcd);
 
-  // toggle E to LOW.
+  // toggle E to LOW. This causes the data to be written to the LCD.
   clear_bit(&lcd->data, LCD_E);
   lcd_port_write(lcd);
-  delay(1);
+
+  // set the data. Make sure just the lower 8 bits get changed.
+  clear_bit(&lcd->data, LCD_DATA);
+  lcd->data |= ((data & 0xF) & LCD_DATA);
+
+  set_bit(&lcd->data, LCD_E);
+  lcd_port_write(lcd);
+
+  // set E to high
+  // set_bit(&lcd->data, LCD_E);
+  // lcd_port_write(lcd);
+  
+  // toggle E to LOW. This causes the data to be written to the LCD.
+  clear_bit(&lcd->data, LCD_E);
+  lcd_port_write(lcd);
+  
+  delayMicroseconds(53);
 }
 
+
 void lcd_initialize(serial_lcd *lcd) {
-  // see: https://cdn-shop.adafruit.com/datasheets/TC2004A-01.pdf
-  delay(20);  // wait time > 40ms afte VDD > 2.7V
+  digitalWrite(lcd->pin_rclk, LOW); // pre-initialize this to low.
+
+  // https://electronics.stackexchange.com/questions/102245/hd44780-initialization-for-4-bit-mode
+  // http://web.alfredstate.edu/faculty/weimandn/lcd/lcd_initialization/lcd_initialization_index.html
   lcd_write_nibble(lcd, 0, 0x3);  // function set [ 0 0 1 DL N 0 * * ] ; DL=1 for 8 bit mode, 0 for 4 bit mode ; N=1 for 16:1 mux, 8 for 8:1
-  delay(10);
+  delayMicroseconds(4500);
   lcd_port_toggle_e(lcd); // toggle E 2 more times (pass the function set value again twice more basically)
-  delay(1);
+  delayMicroseconds(150);
   lcd_port_toggle_e(lcd);
-  delay(1);
+  delayMicroseconds(100);
   lcd_write_nibble(lcd, 0, 0x2); // Function set (Set interface to 4 bits)
-  delay(4);
+  delayMicroseconds(100);
+  
   lcd_write(lcd, 0, 0x2C); // function set (2 lines, 5x11 font)
   lcd_write(lcd, 0, 0x08); // display off, cursor off, blink off
   lcd_write(lcd, 0, 0x01); // clear screen & return cursor home
   lcd_write(lcd, 0, 0x06); // inc cursor to the right when writing and don't shift the screen
-
   lcd_write(lcd, 0, 0x0C); // turn display on
 
   clear_bit (&lcd->data, LCD_DATA); // turn off data pins
