@@ -143,6 +143,12 @@ Have a look in the examples folder for sample use of the library.
 
 * display_text : Prints "Hello" and moves the text back and forth on the screen.  Here I have a 20x4 LCD, so I assume there are 20 visible columns on the display.
 
+# Hardware
+
+A Kicad project for a circuit board to hold the 74HC595 shift register and the trimmer resistors is in the `backpack` sub folder here.
+
+My board design is on OSHPark here: https://oshpark.com/projects/P1p8G9Nj
+
 # Why
 I have and appreciate the I2C LCD backpack. But sometimes I am playing with ATTiny devices,
 or something else that does ot have an I2C. I guess I could use the SPI mode on that.
