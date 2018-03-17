@@ -131,6 +131,8 @@ void lcd_initialize(serial_lcd *lcd) {
 
   // https://electronics.stackexchange.com/questions/102245/hd44780-initialization-for-4-bit-mode
   // http://web.alfredstate.edu/faculty/weimandn/lcd/lcd_initialization/lcd_initialization_index.html
+  // http://www.farnell.com/datasheets/50586.pdf
+  
   lcd_write_nibble(lcd, 0, 0x3);  // function set [ 0 0 1 DL N 0 * * ] ; DL=1 for 8 bit mode, 0 for 4 bit mode ; N=1 for 16:1 mux, 8 for 8:1
   delayMicroseconds(4500);
   lcd_port_toggle_e(lcd); // toggle E 2 more times (pass the function set value again twice more basically)
@@ -196,7 +198,7 @@ void lcd_gotoxy(serial_lcd *lcd, int x, int y) {
     // error
     return;
   }
-  if (y > 2) {
+  if (y > 3) {
     // error
     return;
   }
