@@ -147,7 +147,11 @@ Have a look in the examples folder for sample use of the library.
 
 A Kicad project for a circuit board to hold the 74HC595 shift register and the trimmer resistors is in the `backpack` sub folder here.
 
+<img src="doc/v1_board_3d_model.png" alt="3D model" width="400"/>
+<img src="doc/v1_board_layout.png" alt="board layout" width="200"/>
+
 My board design is on OSHPark here: https://oshpark.com/projects/P1p8G9Nj
+
 
 # Why
 I have and appreciate the I2C LCD backpack. But sometimes I am playing with ATTiny devices,
