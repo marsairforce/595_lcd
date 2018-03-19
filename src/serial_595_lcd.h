@@ -52,6 +52,8 @@ void lcd_clear(serial_lcd *lcd);
 void lcd_home(serial_lcd *lcd);
 
 
+#ifndef _bit_macros_
+#define _bit_macros_
 // TODO: these macros do not really belong here, but we don't have a standard shift register libary yet
 
 // macros for setting or clearing a bit or bit mask of bits.
@@ -61,5 +63,6 @@ static inline void set_bit(int *x, int mask) {
 static inline void clear_bit(int *x, int mask) {
   *x &= ~mask;
 }
+#endif
 
 #endif
