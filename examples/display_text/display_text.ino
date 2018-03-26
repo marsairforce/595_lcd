@@ -1,5 +1,6 @@
 /*
    - 20x4 LCD display, 4 bit mode, driven by 74HC595 shift register
+   The version 2 (current) of the API.
 */
 
 
@@ -9,19 +10,10 @@
 #define PIN_RCLK      7
 
 #include <serial_595_lcd.h>
-
-serial_lcd lcd;
+serial_lcd lcd(PIN_SER, PIN_SRCLK, PIN_RCLK);
 
 void setup() {
-
-  pinMode(PIN_SER,   OUTPUT);
-  pinMode(PIN_SRCLK, OUTPUT);
-  pinMode(PIN_RCLK,  OUTPUT);
-
-  lcd.pin_ser   = PIN_SER;
-  lcd.pin_srclk = PIN_SRCLK;
-  lcd.pin_rclk  = PIN_RCLK;
-  lcd_on(&lcd);
+    lcd.on();
 }
 
 int offset = 0;
@@ -35,11 +27,12 @@ void loop() {
   if (offset -1 < 0) {
     dir = +1;
   }
-  lcd_clear(&lcd);
-  lcd_gotoxy(&lcd, offset, 1);
-  lcd_puts(&lcd, msg);
+
+  lcd.clear();
+  lcd.gotoxy(offset, 1);
+  lcd.puts(msg);
   offset += dir;
-  
+
   delay(500);
 
 }

@@ -48,24 +48,34 @@ public:
  * Functions are for doing all the IO work to drive the LCD.
  */
 struct serial_lcd {
-    int pin_ser;        // the pin number on the Arduino that connects to SER (pin 14 of the 74HC595)
-    int pin_srclk;      // the pin number on the Arduino that connects to the SRCLK (pin 11 on the 74HC595)
-    int pin_rclk;       // the pin number on the Arduino that connects to the RCLK (pin 12 on the 74HC595)
-    volatile unsigned int data;  // the byte value representing the pin state on the 74HC595
   private:
+    int _m_ser;        // the pin number on the Arduino that connects to SER (pin 14 of the 74HC595)
+    int _m_srclk;      // the pin number on the Arduino that connects to the SRCLK (pin 11 on the 74HC595)
+    int _m_rclk;       // the pin number on the Arduino that connects to the RCLK (pin 12 on the 74HC595)
+    volatile unsigned int _m_data;  // the byte value representing the pin state on the 74HC595
 
-  public:
     /**
     * Performs the signalling required to write to a LCD port
     * Write the raw data to the LCD port shift register.
     */
-    void port_write(); // TODO: make this private when we convert to class
-    void port_toggle_e(); // TODO: make this private when we convert to class
+    void port_write();
+    void set_e();
+    void clear_e();
+    void toggle_e();
     /**
-    * writes 4 bits
+    * writes 4 bits. Value in loser 4 bits.
     */
-    void write_nibble(int data); // TODO: make this private when we convert to class
-    void write_byte(int RS, int data); // TODO: make this private when we convert to class
+    void write_nibble(unsigned char data);
+
+    void write_byte(unsigned char RS, unsigned char data);
+
+    void reset_sequence();
+
+
+  public:
+
+    serial_lcd(); // TODO: remove this once we remove v1 api
+    serial_lcd(int pin_ser, int pin_srclk, int pin_rclk);
 
     /**
      * Perform the initialization of the LCD following power on state.
@@ -81,14 +91,20 @@ struct serial_lcd {
 
     /**
      * Turns the LCD on. The power pin of the LCD is wired to an output of the 74HC595 in this case.
+     * Also turns on the backlight.
+     * And then initializes the display.
      */
-    void lcd_on();
+    void on();
 
     /**
      * Turns off the LCD. Note here we need to turn off all the data and control inputs to the LCD,
      * since the LCD will usually be able to derive power from the input pins.
      */
-    void lcd_off();
+    void off();
+
+    void power_on();
+
+    void power_off();
 
     /**
      * Turn the backlight LED on
@@ -149,48 +165,5 @@ struct serial_lcd {
     void display_screen(lcd_screen_buffer *screen);
 };
 
-// @deprecated
-void lcd_on(serial_lcd *lcd);
-
-// @deprecated
-void lcd_off(serial_lcd *lcd);
-
-// @deprecated
-void lcd_backlight_on(serial_lcd *lcd);
-
-// @deprecated
-void lcd_backlight_off(serial_lcd *lcd);
-
-// @deprecated
-void lcd_toggle_backlight(serial_lcd *lcd);
-
-// @deprecated
-void lcd_initialize(serial_lcd *lcd);
-
-// @deprecated
-void lcd_puts(serial_lcd *lcd, char *str);
-
-// @deprecated
-void lcd_gotoxy(serial_lcd *lcd, int x, int y) ;
-
-// @deprecated
-void lcd_clear(serial_lcd *lcd);
-
-// @deprecated
-void lcd_home(serial_lcd *lcd);
-
-
-#ifndef _bit_macros_
-#define _bit_macros_
-// TODO: these macros do not really belong here, but we don't have a standard shift register libary yet
-
-// macros for setting or clearing a bit or bit mask of bits.
-static inline void set_bit(unsigned int *x, unsigned int mask) {
-  *x |= mask;
-}
-static inline void clear_bit(unsigned int *x, unsigned int mask) {
-  *x &= ~mask;
-}
-#endif
 
 #endif

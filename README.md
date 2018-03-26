@@ -3,6 +3,7 @@
 * Using the 4 bit mode of the standard HD44780 type LCD controller.
 
 ![schematic](doc/v1_schematic.png)
+
 # Theory
 * 4 data pins
 * RS pin
@@ -110,7 +111,7 @@ would need 2 shift registers to get at least 10 bits.
 
 But when we operate the display in 8 bit mode we just send out the value on the 8 pins and strobe `E` once. So there is perhaps a compelling reason to use 8 bit mode if we wanted to save some timing requirements.
 
-Measurement in my implementation, the time required to write one nibble is about 275 microseconds. So an entire command byte is then the order of 550 microseconds.  
+Measurement in my implementation, the time required to write one nibble is about 275 microseconds. So an entire command byte is then the order of 550 microseconds.
 In my application this is fine. The LCD display has a hysteresis effect, so updating or moving characters faster appear to be blurry anyway.
 
 # Software Features
@@ -134,7 +135,7 @@ The data property should generally not be mutated by your application. This repr
 
 See the table above.
 
-All functions in the libary have the sensible prefix `lcd_`. Hopefully to not collide with functions in your Sketch or other Arduino libraries that happen to be in use.  
+All functions in the libary have the sensible prefix `lcd_`. Hopefully to not collide with functions in your Sketch or other Arduino libraries that happen to be in use.
 
 There is no reason you could not also use the Adafruit LCD library at the same time, for example.
 
