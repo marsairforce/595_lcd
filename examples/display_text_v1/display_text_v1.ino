@@ -21,9 +21,9 @@ void setup() {
   pinMode(PIN_SRCLK, OUTPUT);
   pinMode(PIN_RCLK,  OUTPUT);
 
-  lcd.pin_ser   = PIN_SER;
-  lcd.pin_srclk = PIN_SRCLK;
-  lcd.pin_rclk  = PIN_RCLK;
+  lcd._m_ser   = PIN_SER;
+  lcd._m_srclk = PIN_SRCLK;
+  lcd._m_rclk  = PIN_RCLK;
   lcd_on(&lcd);
 }
 
