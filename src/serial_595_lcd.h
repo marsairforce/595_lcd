@@ -34,7 +34,7 @@ typedef unsigned char byte;
 struct lcd_screen_buffer {
   char buf[ LCD_DRAM_MAX_COLUMN * LCD_DRAM_MAX_ROW + 1]; // +1 for the null terminator
   byte cursor; // the index into the DRAM buffer where the cursor is
-  
+
   // bit fields
   byte cursor_visible : 1;
   byte cursor_blink : 1;
@@ -53,7 +53,7 @@ struct serial_lcd {
     int pin_rclk;       // the pin number on the Arduino that connects to the RCLK (pin 12 on the 74HC595)
     volatile unsigned int data;  // the byte value representing the pin state on the 74HC595
   private:
-    
+
   public:
     /**
     * Performs the signalling required to write to a LCD port
@@ -64,15 +64,15 @@ struct serial_lcd {
     /**
     * writes 4 bits
     */
-    void write_nibble(int RS, int data); // TODO: make this private when we convert to class
+    void write_nibble(int data); // TODO: make this private when we convert to class
     void write_byte(int RS, int data); // TODO: make this private when we convert to class
-    
+
     /**
      * Perform the initialization of the LCD following power on state.
      * See the data sheets. There is a few magic bytes of chatter we need to do, and a timing sequence that is also magic.
      */
     void initialize();
-    
+
     /**
      * Set DDRAM address in address counter
      * this function takes 37 us
@@ -83,35 +83,35 @@ struct serial_lcd {
      * Turns the LCD on. The power pin of the LCD is wired to an output of the 74HC595 in this case.
      */
     void lcd_on();
-    
+
     /**
      * Turns off the LCD. Note here we need to turn off all the data and control inputs to the LCD,
      * since the LCD will usually be able to derive power from the input pins.
      */
     void lcd_off();
-    
+
     /**
      * Turn the backlight LED on
      */
     void backlight_on();
-    
+
     /**
      * Turn the backlight LED off
      */
     void backlight_off();
-    
+
     /**
      * Toggle the state of the backlight
      */
     void toggle_backlight();
-    
+
     /**
      * Set DDRAM address to "00H" from AC and return cursor to its original position if shifted.
      * The contents of DDRAM are not changed.
      * This function takes 1.52ms
      */
     void home();
-    
+
     /**
      * The devices provide a 7 bit DRAM address
      * Internally there are 40 character columns, even if the display does not physically have this many columns
@@ -130,17 +130,17 @@ struct serial_lcd {
      * that satisfies this mess.
      */
     void gotoxy(int x, int y);
-    
+
     /**
      * Write a string to the LCD at the current memory location.
      */
     void puts(char *str);
-    
+
     /**
      * Clear the screen
      */
     void clear();
-    
+
     /**
      * Causes the contents of the screen to be displayed onto the LCD.
      * This will clear the entire contents if any on the LCD,
