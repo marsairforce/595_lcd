@@ -3,6 +3,8 @@
 The serial_595_lcd library provides the software interface to use a HD44780 type parallel LCD display
 through a 74HC595, so that only (3) digital output pins are required to control it.
 
+![schematic](doc/v1_schematic.png)
+
 This was inspired by those I2C or SPI LCD backpacks from Adafruit.
 
 Only here, well, we just use a 74HC595.
