@@ -49,6 +49,10 @@ public:
  */
 struct serial_lcd {
   private:
+    int _m_ser;        // the pin number on the Arduino that connects to SER (pin 14 of the 74HC595)
+    int _m_srclk;      // the pin number on the Arduino that connects to the SRCLK (pin 11 on the 74HC595)
+    int _m_rclk;       // the pin number on the Arduino that connects to the RCLK (pin 12 on the 74HC595)
+
     volatile unsigned int _m_data;  // the byte value representing the pin state on the 74HC595
 
     /**
@@ -68,13 +72,8 @@ struct serial_lcd {
 
     void reset_sequence();
 
-
   public:
-    int _m_ser;        // the pin number on the Arduino that connects to SER (pin 14 of the 74HC595)
-    int _m_srclk;      // the pin number on the Arduino that connects to the SRCLK (pin 11 on the 74HC595)
-    int _m_rclk;       // the pin number on the Arduino that connects to the RCLK (pin 12 on the 74HC595)
 
-    serial_lcd(); // TODO: remove this once we remove v1 api
     serial_lcd(int pin_ser, int pin_srclk, int pin_rclk);
 
     /**

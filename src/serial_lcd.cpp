@@ -4,10 +4,6 @@
 #include "bit_macros.h"
 #include <Arduino.h>
 
-serial_lcd::serial_lcd() {
-  // for compatibility with v1
-}
-
 serial_lcd::serial_lcd(int ser, int srclk, int rclk) {
   _m_ser   = ser;
   _m_srclk = srclk;
