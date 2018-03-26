@@ -63,10 +63,14 @@ struct serial_lcd {
     void clear_e();
     void toggle_e();
     /**
-    * writes 4 bits
+    * writes 4 bits. Value in loser 4 bits.
     */
-    void write_nibble(int RS, int data);
-    void write_byte(int RS, int data);
+    void write_nibble(unsigned char data);
+
+    void write_byte(unsigned char RS, unsigned char data);
+
+    void reset_sequence();
+
 
   public:
 

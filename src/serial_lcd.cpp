@@ -26,7 +26,6 @@ void serial_lcd::port_write() {
   digitalWrite(_m_rclk, HIGH);
   digitalWrite(_m_ser, LOW);
   digitalWrite(_m_rclk, LOW);
-
 }
 
 void serial_lcd::set_e() {
@@ -50,20 +49,13 @@ void serial_lcd::toggle_e() {
   port_write();
 }
 
-void serial_lcd::write_nibble(int RS, int data) {
+void serial_lcd::write_nibble(unsigned char data) {
   // see the write timing diagram
-
-  // set up RS
-  if (RS) {
-    set_bit(&_m_data, LCD_RS);
-  } else {
-    clear_bit(&_m_data, LCD_RS);
-  }
-
+  clear_bit(&_m_data, LCD_RS);  // rs is always 0. we only write nibbles for reset sequence.
+  clear_bit(&_m_data, LCD_DATA);
   set_e();
 
   // set the data. Make sure just the lower 8 bits get changed.
-  clear_bit(&_m_data, LCD_DATA);
   _m_data |= (data & LCD_DATA);
   port_write();
 
@@ -71,36 +63,35 @@ void serial_lcd::write_nibble(int RS, int data) {
   clear_e();
 }
 
-void serial_lcd::write_byte(int RS, int d_in) {
+void serial_lcd::write_byte(unsigned char RS, unsigned char d_in) {
   // set up RS
   if (RS) {
     set_bit(&_m_data, LCD_RS);
   } else {
     clear_bit(&_m_data, LCD_RS);
   }
+  clear_bit(&_m_data, LCD_DATA);
+  port_write();
 
-  // set E to high
   set_e();
 
-  // set the data. Make sure just the lower 8 bits get changed.
-  clear_bit(&_m_data, LCD_DATA);
+  // upper 4 bits
   _m_data |= ((d_in  >> 4) & LCD_DATA);
   port_write();
 
   clear_e();
 
-  delayMicroseconds(80);
-
   set_e();
 
-  // set the data. Make sure just the lower 8 bits get changed.
+  // lower 4 bits
   clear_bit(&_m_data, LCD_DATA);
   _m_data |= (d_in & LCD_DATA);
-
+  port_write();
 
   clear_e();
 
-  delayMicroseconds(80); // TODO: this was 80. Make sure things still work.
+  clear_bit (&_m_data, LCD_DATA | LCD_RS ); // turn off data and control pins
+  port_write();
 }
 
 void serial_lcd::on() {
@@ -146,30 +137,34 @@ void serial_lcd::toggle_backlight() {
   }
 }
 
-void serial_lcd::initialize() {
-//  digitalWrite(this->pin_rclk, LOW); // pre-initialize this to low. (now done in constructor)
-
+void serial_lcd::reset_sequence() {
   // https://electronics.stackexchange.com/questions/102245/hd44780-initialization-for-4-bit-mode
   // http://web.alfredstate.edu/faculty/weimandn/lcd/lcd_initialization/lcd_initialization_index.html
   // http://www.farnell.com/datasheets/50586.pdf
 
-  write_nibble(0, 0x3);  // function set [ 0 0 1 DL N 0 * * ] ; DL=1 for 8 bit mode, 0 for 4 bit mode ; N=1 for 16:1 mux, 8 for 8:1
-  delayMicroseconds(5000); // was 4500
+  write_nibble(0x3);  // function set [ 0 0 1 DL N 0 * * ] ; DL=1 for 8 bit mode, 0 for 4 bit mode ; N=1 for 16:1 mux, 8 for 8:1
+//  delayMicroseconds(5000); // was 4500
+  ;
   toggle_e(); // toggle E 2 more times (pass the function set value again twice more basically)
-  delayMicroseconds(200); // was 100
-  toggle_e();
-  delayMicroseconds(200);
-  write_nibble(0, 0x2); // Function set (Set interface to 4 bits)
-  delayMicroseconds(200);
+//  delayMicroseconds(100); // was 100
 
+  toggle_e();
+//  delayMicroseconds(100);
+
+  write_nibble(0x2); // Function set (Set interface to 4 bits)
+//  delayMicroseconds(100);
+
+  clear_bit (&_m_data, LCD_DATA ); // turn off data and control pins
+  port_write();
+}
+
+void serial_lcd::initialize() {
+  reset_sequence();
   write_byte(0, 0x2C); // function set (2 lines, 5x11 font)
   write_byte(0, 0x08); // display off, cursor off, blink off
   write_byte(0, 0x01); // clear screen & return cursor home
   write_byte(0, 0x06); // inc cursor to the right when writing and don't shift the screen
   write_byte(0, 0x0C); // turn display on
-
-  clear_bit (&_m_data, LCD_DATA); // turn off data pins
-  port_write();
 }
 
 void serial_lcd::home() {
