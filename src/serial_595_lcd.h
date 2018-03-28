@@ -40,6 +40,9 @@ struct lcd_screen_buffer {
   byte cursor_blink : 1;
 public:
   void clear_screen();
+  void puts(char *str);
+  void set_dram_address(unsigned char address);
+
 };
 
 /**
@@ -52,6 +55,8 @@ struct serial_lcd {
     int _m_ser;        // the pin number on the Arduino that connects to SER (pin 14 of the 74HC595)
     int _m_srclk;      // the pin number on the Arduino that connects to the SRCLK (pin 11 on the 74HC595)
     int _m_rclk;       // the pin number on the Arduino that connects to the RCLK (pin 12 on the 74HC595)
+    int _m_cols = 20;
+    int _m_rows = 4;
 
     volatile unsigned int _m_data;  // the byte value representing the pin state on the 74HC595
 
@@ -82,11 +87,13 @@ struct serial_lcd {
      */
     void initialize();
 
+    void set_size(int cols, int rows);
+
     /**
      * Set DDRAM address in address counter
      * this function takes 37 us
      */
-    void set_dram_address(int address);
+    void set_dram_address(unsigned char address);
 
     /**
      * Turns the LCD on. The power pin of the LCD is wired to an output of the 74HC595 in this case.
@@ -144,7 +151,7 @@ struct serial_lcd {
      * so we want to convert the input of (x,y) to the linear value
      * that satisfies this mess.
      */
-    void gotoxy(int x, int y);
+    void gotoxy(unsigned char x, unsigned char y);
 
     /**
      * Write a string to the LCD at the current memory location.

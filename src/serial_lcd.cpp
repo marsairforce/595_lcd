@@ -163,25 +163,30 @@ void serial_lcd::initialize() {
   write_byte(0, 0x0C); // turn display on
 }
 
+void serial_lcd::set_size(int cols, int rows) {
+  _m_cols = cols;
+  _m_rows = rows;
+}
+
 void serial_lcd::home() {
   write_byte(0, 0x02); // go to home position
 }
 
-void serial_lcd::set_dram_address(int address) {
+void serial_lcd::set_dram_address(unsigned char address) {
   write_byte(0, 0x80 + (address & 0x7F));
 }
 
-void serial_lcd::gotoxy(int x, int y) {
+void serial_lcd::gotoxy(unsigned char x, unsigned char y) {
   int offset = 0;
-  if (x > 19) {
+  if (x > (_m_cols - 1)) {
     // error
     return;
   }
-  if (y > 3) {
+  if (y > (_m_rows - 1)) {
     // error
     return;
   }
-  if ( y == 1 || y == 3) {
+  if ( y == 1 || y == 3 ) {
     offset += 0x40;
   }
   if (y == 2 || y == 3 ) {
