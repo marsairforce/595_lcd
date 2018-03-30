@@ -127,6 +127,42 @@ class Adafruit_I2C_lcd : public HD44780_LCD, public Print {
   virtual void write4bits(uint8_t);
 };
 
+class PCF8574_lcd : public HD44780_LCD, public Print {
+  public:
+  PCF8574_lcd(uint8_t addr);
+  virtual void begin(uint8_t cols, uint8_t rows, uint8_t charsize = LCD_5x8DOTS);
+  virtual void setBacklight(uint8_t status);
+  virtual size_t write(uint8_t); // for Print class
+
+  private:
+  uint8_t _addr;
+
+  // bit fields and flags for the state of the parallel port data on the PCF8574 as it is connected to the LCD.
+  // your device might be built differently. Check your datasheet.
+  // Define the LSB first
+  union {
+    struct {
+      uint8_t rs:1;         // P0
+      uint8_t rw:1;         // P1
+      uint8_t en:1;         // P2
+      uint8_t backlight:1;  // P3
+      uint8_t data:4;       // P4..P7
+    } field;
+    uint8_t raw;
+  } _data;
+
+  virtual void send(uint8_t value, boolean mode);
+  virtual void write4bits(uint8_t);
+
+  // The raw write the state to the i2c to parallel output port.
+  void write2Wire();
+};
+
+#define LCD_E           0x10
+#define LCD_RS          0x20
+#define LCD_BACKLIGHT   0x40
+#define LCD_POWER       0x80
+#define LCD_DATA        0x0F
 /**
  * This structure represents a LCD display as it is connected behind a 74HC595 shift register.
  * Fields then store the specific digital IO pin numbers, a byte register for the value on the shift register.

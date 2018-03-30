@@ -19,7 +19,8 @@ After building a serial to parallel converter, and then owning a couple differen
 * Adafruit LCD backpack, driven by MCP23008: [Adafruit_LiquidCrystal](https://github.com/adafruit/Adafruit_LiquidCrystal)
   * This extends the Arduino community [LiquidCrystal library](https://github.com/arduino-libraries/LiquidCrystal/blob/master/src/LiquidCrystal.h) ([doc](https://www.arduino.cc/en/Reference/LiquidCrystal))
   * Kind of not sure why they did not just subclass the LiquidCrystal one. They just added a couple functions. But left the parallel operation things, which are never going to be used in this mode.
-* Generic LCD backpack, driven by PCF8574: [LiquidCrystal_PCF8574](https://github.com/mathertel/LiquidCrystal_PCF8574)
+* Generic LCD backpack, driven by PCF8574: "I2C LCD1602/2004 Adapter Plate" from Ali Express.
+  * Another library here: [LiquidCrystal_PCF8574](https://github.com/mathertel/LiquidCrystal_PCF8574)
 
 * (and also my own library evolving here)
 
@@ -27,14 +28,10 @@ I started to have the general theory, that I would like the same software interf
 
 This facilitated extracting an interface of the functions that exist in each library and making a common parent class, that is implemented by each specific library. If there are any specific messaging needed that is.
 
-| Function         | Description       | Serial 595 | MCP23008 | PCF8574 |
-| :-------         | :---------        | :---------:| :------: | :-----: |
-| begin            | initialize the LCD row and columns | | Y | |
-| clear            | Clears the screen | Y  | Y | Y |
-| home    |||||
-
 I chose to not subclass the Arduino LiquidCrystal class, since it has a bunch of fields that only make sense if you are parallel mode.  I guess really for completeness I should define a class to support 4 bit parallel mode here as well.
 
+
+# 74HC595 LCD Interface
 # Theory
 * Using the 4 bit mode of the standard HD44780 type LCD controller.
 * RS pin
@@ -197,3 +194,24 @@ But then I am impatient and don't have them at the moment when I feel like wirin
 and it turns out I do have a bunch of 74HC595's. So there is that.
 
 I also thought it is a good learning experience to build something yourself sometimes.
+
+# Other hardwares
+I felt like making this library work for the other types of serial LCD backpacks I had, so I didn't need to have a bunch of libraries to maintain.
+
+# PCF8574
+You can get these on Ali Epress in a bunch of them in a lot for a couple dollars a piece. Really it is cheaper than me buying even a 74HC595 device. I don't know how they do it.
+
+![PCF8574 pinout](doc/PCF8574T.png)
+
+Mapping to the LCD pins
+
+| PCF8574T | LCD |
+| :------- | :-- |
+| P0 | RS |
+| P1 | RW |
+| P2 | E  |
+| P3 | BACKLIGHT |
+| P4 | D4 (D0) |
+| P5 | D5 (D1) |
+| P6 | D6 (D2) |
+| P7 | D7 (D3) |
