@@ -160,11 +160,6 @@ class Adafruit_I2C_lcd : public HD44780_LCD, public Print {
   uint8_t _i2cAddr;
   Adafruit_MCP23008 _i2c;
 
-  uint8_t _rs_pin; // LOW: command.  HIGH: character.
-  uint8_t _enable_pin; // activated by a HIGH pulse.
-  uint8_t _data_pins[4];
-  uint8_t _backlight_pin;
-
   virtual void send(uint8_t value, boolean mode);
   virtual void write4bits(uint8_t);
 };
