@@ -4,7 +4,7 @@
 #include "bit_macros.h"
 #include <Arduino.h>
 
-serial_lcd::serial_lcd(int ser, int srclk, int rclk) {
+serial_lcd::serial_595_lcd(int ser, int srclk, int rclk) {
   _m_ser   = ser;
   _m_srclk = srclk;
   _m_rclk  = rclk;
@@ -16,7 +16,7 @@ serial_lcd::serial_lcd(int ser, int srclk, int rclk) {
 
 }
 
-void serial_lcd::port_write() {
+void serial_595_lcd::port_write() {
   shiftOut(_m_ser, _m_srclk, LSBFIRST, _m_data);
 
   digitalWrite(_m_rclk, HIGH);
@@ -24,18 +24,18 @@ void serial_lcd::port_write() {
   digitalWrite(_m_rclk, LOW);
 }
 
-void serial_lcd::set_e() {
+void serial_595_lcd::set_e() {
   // set E to high
   set_bit(&_m_data, LCD_E);
   port_write();
 }
 
-void serial_lcd::clear_e() {
+void serial_595_lcd::clear_e() {
   clear_bit(&_m_data, LCD_E);
   port_write();
 }
 
-void serial_lcd::toggle_e() {
+void serial_595_lcd::toggle_e() {
   set_bit(&_m_data, LCD_E);
   port_write();
 
@@ -45,7 +45,7 @@ void serial_lcd::toggle_e() {
   port_write();
 }
 
-void serial_lcd::write_nibble(unsigned char data) {
+void serial_595_lcd::write_nibble(unsigned char data) {
   // see the write timing diagram
   clear_bit(&_m_data, LCD_RS);  // rs is always 0. we only write nibbles for reset sequence.
   clear_bit(&_m_data, LCD_DATA);
@@ -59,7 +59,7 @@ void serial_lcd::write_nibble(unsigned char data) {
   clear_e();
 }
 
-void serial_lcd::write_byte(unsigned char RS, unsigned char d_in) {
+void serial_595_lcd::write_byte(unsigned char RS, unsigned char d_in) {
   // set up RS
   if (RS) {
     set_bit(&_m_data, LCD_RS);
@@ -90,7 +90,7 @@ void serial_lcd::write_byte(unsigned char RS, unsigned char d_in) {
   port_write();
 }
 
-void serial_lcd::on() {
+void serial_595_lcd::on() {
   set_bit(&_m_data, LCD_POWER);
   port_write();
   backlight_on();
@@ -99,32 +99,32 @@ void serial_lcd::on() {
   initialize();
 }
 
-void serial_lcd::off() {
+void serial_595_lcd::off() {
   _m_data = 0;
   port_write();
 }
 
-void serial_lcd::power_on() {
+void serial_595_lcd::power_on() {
   set_bit(&_m_data, LCD_POWER);
   port_write();
 }
 
-void serial_lcd::power_off() {
+void serial_595_lcd::power_off() {
   clear_bit(&_m_data, LCD_POWER);
   port_write();
 }
 
-void serial_lcd::backlight_on() {
+void serial_595_lcd::backlight_on() {
   set_bit(&_m_data, LCD_BACKLIGHT);
   port_write();
 }
 
-void serial_lcd::backlight_off() {
+void serial_595_lcd::backlight_off() {
   clear_bit(&_m_data, LCD_BACKLIGHT);
   port_write();
 }
 
-void serial_lcd::toggle_backlight() {
+void serial_595_lcd::toggle_backlight() {
   if (_m_data & LCD_BACKLIGHT) {
       backlight_off();
   }
@@ -133,7 +133,7 @@ void serial_lcd::toggle_backlight() {
   }
 }
 
-void serial_lcd::reset_sequence() {
+void serial_595_lcd::reset_sequence() {
   // https://electronics.stackexchange.com/questions/102245/hd44780-initialization-for-4-bit-mode
   // http://web.alfredstate.edu/faculty/weimandn/lcd/lcd_initialization/lcd_initialization_index.html
   // http://www.farnell.com/datasheets/50586.pdf
@@ -154,7 +154,7 @@ void serial_lcd::reset_sequence() {
   port_write();
 }
 
-void serial_lcd::initialize() {
+void serial_595_lcd::initialize() {
   reset_sequence();
   write_byte(0, 0x2C); // function set (2 lines, 5x11 font)
   write_byte(0, 0x08); // display off, cursor off, blink off
@@ -163,20 +163,20 @@ void serial_lcd::initialize() {
   write_byte(0, 0x0C); // turn display on
 }
 
-void serial_lcd::set_size(int cols, int rows) {
+void serial_595_lcd::set_size(int cols, int rows) {
   _m_cols = cols;
   _m_rows = rows;
 }
 
-void serial_lcd::home() {
+void serial_595_lcd::home() {
   write_byte(0, 0x02); // go to home position
 }
 
-void serial_lcd::set_dram_address(unsigned char address) {
+void serial_595_lcd::set_dram_address(unsigned char address) {
   write_byte(0, 0x80 + (address & 0x7F));
 }
 
-void serial_lcd::gotoxy(unsigned char x, unsigned char y) {
+void serial_595_lcd::gotoxy(unsigned char x, unsigned char y) {
   int offset = 0;
   if (x > (_m_cols - 1)) {
     // error
@@ -196,7 +196,7 @@ void serial_lcd::gotoxy(unsigned char x, unsigned char y) {
   set_dram_address(offset);
 }
 
-void serial_lcd::puts(char *str) {
+void serial_595_lcd::puts(char *str) {
   for (int i = 0; str[i] != 0; i++) {
     // TODO: define auto shift ability?
     // if (i > 15) {
@@ -209,11 +209,11 @@ void serial_lcd::puts(char *str) {
   port_write();
 }
 
-void serial_lcd::clear() {
+void serial_595_lcd::clear() {
   write_byte(0, 0x01);
   delay(1); // TODO: determine if we can use smaller value here.
 }
 
-void serial_lcd::display_screen(lcd_screen_buffer *screen) {
+void serial_595_lcd::display_screen(lcd_screen_buffer *screen) {
     // TODO
 }

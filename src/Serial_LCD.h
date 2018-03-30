@@ -1,10 +1,46 @@
 
-#ifndef _serial_595_lcd_h_
-#define _serial_595_lcd_h_
+#ifndef _Serial_LCD_h_
+#define _Serial_LCD_h_
 
-#ifndef byte
-typedef unsigned char byte;
-#endif
+#include <inttypes.h>
+
+// commands
+#define LCD_CLEARDISPLAY 0x01
+#define LCD_RETURNHOME 0x02
+#define LCD_ENTRYMODESET 0x04
+#define LCD_DISPLAYCONTROL 0x08
+#define LCD_CURSORSHIFT 0x10
+#define LCD_FUNCTIONSET 0x20
+#define LCD_SETCGRAMADDR 0x40
+#define LCD_SETDDRAMADDR 0x80
+
+// flags for display entry mode
+#define LCD_ENTRYRIGHT 0x00
+#define LCD_ENTRYLEFT 0x02
+#define LCD_ENTRYSHIFTINCREMENT 0x01
+#define LCD_ENTRYSHIFTDECREMENT 0x00
+
+// flags for display on/off control
+#define LCD_DISPLAYON 0x04
+#define LCD_DISPLAYOFF 0x00
+#define LCD_CURSORON 0x02
+#define LCD_CURSOROFF 0x00
+#define LCD_BLINKON 0x01
+#define LCD_BLINKOFF 0x00
+
+// flags for display/cursor shift
+#define LCD_DISPLAYMOVE 0x08
+#define LCD_CURSORMOVE 0x00
+#define LCD_MOVERIGHT 0x04
+#define LCD_MOVELEFT 0x00
+
+// flags for function set
+#define LCD_8BITMODE 0x10
+#define LCD_4BITMODE 0x00
+#define LCD_2LINE 0x08
+#define LCD_1LINE 0x00
+#define LCD_5x10DOTS 0x04
+#define LCD_5x8DOTS 0x00
 
 #define LCD_E           0x10
 #define LCD_RS          0x20
@@ -42,15 +78,21 @@ public:
   void clear_screen();
   void puts(char *str);
   void set_dram_address(unsigned char address);
+};
 
+/**
+ * A class compatible with the Arduino LiquidCrystal library.
+ */
+class Serial_LCD {
+
+  void begin(uint8_t cols, uint8_t rows, uint8_t) charsize = LCD_5x8DOTS);
 };
 
 /**
  * This structure represents a LCD display as it is connected behind a 74HC595 shift register.
  * Fields then store the specific digital IO pin numbers, a byte register for the value on the shift register.
- * Functions are for doing all the IO work to drive the LCD.
  */
-struct serial_lcd {
+struct serial_595_lcd : public Serial_LCD {
   private:
     int _m_ser;        // the pin number on the Arduino that connects to SER (pin 14 of the 74HC595)
     int _m_srclk;      // the pin number on the Arduino that connects to the SRCLK (pin 11 on the 74HC595)

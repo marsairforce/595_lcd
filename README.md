@@ -1,11 +1,42 @@
 # LCD driven by a 74HC595
 
-* Using the 4 bit mode of the standard HD44780 type LCD controller.
+This was inspired by those I2C or SPI LCD backpacks from Adafruit.
 
 ![schematic](doc/v1_schematic.png)
 
+Only here, well, we just use a 74HC595.
+
+The library requires (3) digital IO pins on your Arduino.
+
+There are some assumptions for how the LCD is connected to the 74HC595, see the
+schematic in the doc folder.
+
+For more information about this library please visit us at
+https://github.com/marsairforce/595_lcd
+
+# General Serial LCD Operation
+After building a serial to parallel converter, and then owning a couple different I2C kinds:
+* Adafruit LCD backpack, driven by MCP23008: [Adafruit_LiquidCrystal](https://github.com/adafruit/Adafruit_LiquidCrystal)
+  * This extends the Arduino community [LiquidCrystal library](https://github.com/arduino-libraries/LiquidCrystal/blob/master/src/LiquidCrystal.h) ([doc](https://www.arduino.cc/en/Reference/LiquidCrystal))
+  * Kind of not sure why they did not just subclass the LiquidCrystal one. They just added a couple functions. But left the parallel operation things, which are never going to be used in this mode.
+* Generic LCD backpack, driven by PCF8574: [LiquidCrystal_PCF8574](https://github.com/mathertel/LiquidCrystal_PCF8574)
+
+* (and also my own library evolving here)
+
+I started to have the general theory, that I would like the same software interface (using a display buffer), but to support the specific lcd backend technology.
+
+This facilitated extracting an interface of the functions that exist in each library and making a common parent class, that is implemented by each specific library. If there are any specific messaging needed that is.
+
+| Function         | Description       | Serial 595 | MCP23008 | PCF8574 |
+| :-------         | :---------        | :---------:| :------: | :-----: |
+| begin            | initialize the LCD row and columns | | Y | |
+| clear            | Clears the screen | Y  | Y | Y |
+| home    |||||
+
+I chose to not subclass the Arduino LiquidCrystal class, since it has a bunch of fields that only make sense if you are parallel mode.  I guess really for completeness I should define a class to support 4 bit parallel mode here as well.
+
 # Theory
-* 4 data pins
+* Using the 4 bit mode of the standard HD44780 type LCD controller.
 * RS pin
 * E pin
 * Variable resistor to adjust contrast.

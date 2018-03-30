@@ -9,8 +9,8 @@
 #define PIN_SRCLK     6
 #define PIN_RCLK      7
 
-#include <serial_595_lcd.h>
-serial_lcd lcd(PIN_SER, PIN_SRCLK, PIN_RCLK);
+#include <Serial_LCD.h>
+serial_595_lcd lcd(PIN_SER, PIN_SRCLK, PIN_RCLK);
 
 void setup() {
     lcd.on();
