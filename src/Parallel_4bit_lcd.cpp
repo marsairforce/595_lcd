@@ -15,17 +15,17 @@ Parallel_4bit_lcd::Parallel_4bit_lcd(uint8_t rs, uint8_t enable, uint8_t d0, uin
     _backlight_pin = backlight_pin;
 
     pinMode(_rs_pin, OUTPUT);
+    digitalWrite(_rs_pin, LOW);
+
     pinMode(_enable_pin, OUTPUT);
+    digitalWrite(_enable_pin, LOW);    
 
     for (int i = 0; i < 4; i++) {
       pinMode(_data_pins[i], OUTPUT);
-      pinMode(_data_pins[i], 0);
+      digitalWrite(_data_pins[i], 0);
     }
 
     pinMode(_backlight_pin, OUTPUT);
-    digitalWrite(_rs_pin, LOW);
-    digitalWrite(_enable_pin, LOW);    
-
 }
 
 
