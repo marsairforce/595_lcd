@@ -25,13 +25,17 @@ Parallel_4bit_lcd::Parallel_4bit_lcd(uint8_t rs, uint8_t enable, uint8_t d0, uin
       digitalWrite(_data_pins[i], 0);
     }
 
-    pinMode(_backlight_pin, OUTPUT);
+    if (_backlight_pin > 0) {
+        pinMode(_backlight_pin, OUTPUT);
+    }
 }
 
 
 void Parallel_4bit_lcd::setBacklight(uint8_t status) 
-{
-    digitalWrite(_backlight_pin,  (status) ? HIGH : LOW);
+{   
+    if (_backlight_pin > 0) {
+        digitalWrite(_backlight_pin,  (status) ? HIGH : LOW);
+    }
 }
 
 inline size_t Parallel_4bit_lcd::write(uint8_t value) {

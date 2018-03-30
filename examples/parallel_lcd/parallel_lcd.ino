@@ -13,10 +13,11 @@
 
 #include "LCD.h"
 
-Parallel_4bit_lcd lcd(8, 9, 4, 5, 6, 7, 10);
+Parallel_4bit_lcd lcd(8, 9, 4, 5, 6, 7,10);
 
 void setup() {
     lcd.begin(16,2);
+    lcd.setBacklight(1);
 }
 
 int i = 0;
