@@ -4,6 +4,7 @@
 
 #include "Arduino.h"
 #include <inttypes.h>
+#include "Adafruit_MCP23008.h"
 
 // commands
 #define LCD_CLEARDISPLAY 0x01
@@ -116,7 +117,7 @@ class HD44780_LCD {
   // sends a control command to the LCD
   void command(uint8_t);
 
-  protected:
+  private:
   uint8_t _displayfunction;
   uint8_t _displaycontrol;
   uint8_t _displaymode;  
@@ -135,14 +136,29 @@ class Parallel_4bit_lcd : public HD44780_LCD, public Print {
   virtual size_t write(uint8_t); // for Print class
 
   private:
-    uint8_t _rs_pin; // LOW: command.  HIGH: character.
-    uint8_t _enable_pin; // activated by a HIGH pulse.
-    uint8_t _data_pins[4];
-    uint8_t _backlight_pin;
+  uint8_t _rs_pin; // LOW: command.  HIGH: character.
+  uint8_t _enable_pin; // activated by a HIGH pulse.
+  uint8_t _data_pins[4];
+  uint8_t _backlight_pin;
+
   virtual void send(uint8_t value, boolean mode);
   void write4bits(uint8_t);
   void pulseEnable();
 
+};
+
+class Adafruit_I2C_lcd : public HD44780_LCD, public Print {
+  public:
+  Adafruit_I2C_lcd(uint8_t i2cAddr);
+  virtual void setBacklight(uint8_t status);
+  virtual size_t write(uint8_t); // for Print class
+
+  private:
+  uint8_t _i2cAddr;
+  Adafruit_MCP23008 _i2c;
+
+  virtual void send(uint8_t value, boolean mode);
+  void write4bits(uint8_t);
 };
 
 /**
@@ -150,13 +166,6 @@ class Parallel_4bit_lcd : public HD44780_LCD, public Print {
  * Fields then store the specific digital IO pin numbers, a byte register for the value on the shift register.
  */
 struct serial_595_lcd : public HD44780_LCD {
-  private:
-    uint8_t _m_ser;        // the pin number on the Arduino that connects to SER (pin 14 of the 74HC595)
-    uint8_t _m_srclk;      // the pin number on the Arduino that connects to the SRCLK (pin 11 on the 74HC595)
-    uint8_t _m_rclk;       // the pin number on the Arduino that connects to the RCLK (pin 12 on the 74HC595)
-
-    volatile uint8_t _m_data;  // the byte value representing the pin state on the 74HC595
-
     /**
     * Performs the signalling required to write to a LCD port
     * Write the raw data to the LCD port shift register.
@@ -266,6 +275,13 @@ struct serial_595_lcd : public HD44780_LCD {
      * and update the cursor position, cursor visible, and cursor blink, as to what ever they were in the screen structure.
      */
     void display_screen(lcd_screen_buffer *screen);
+
+  private:
+    uint8_t _m_ser;        // the pin number on the Arduino that connects to SER (pin 14 of the 74HC595)
+    uint8_t _m_srclk;      // the pin number on the Arduino that connects to the SRCLK (pin 11 on the 74HC595)
+    uint8_t _m_rclk;       // the pin number on the Arduino that connects to the RCLK (pin 12 on the 74HC595)
+
+    volatile uint8_t _m_data;  // the byte value representing the pin state on the 74HC595    
 };
 
 
