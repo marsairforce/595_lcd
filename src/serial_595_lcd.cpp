@@ -1,19 +1,19 @@
 // member functions for serial_lcd
 
-#include "serial_595_lcd.h"
+#include "LCD.h"
+#include <inttypes.h>
 #include "bit_macros.h"
 #include <Arduino.h>
 
-serial_lcd::serial_595_lcd(int ser, int srclk, int rclk) {
-  _m_ser   = ser;
-  _m_srclk = srclk;
-  _m_rclk  = rclk;
+serial_595_lcd::serial_595_lcd(uint8_t pin_ser, uint8_t pin_srclk, uint8_t pin_rclk) {
+  _m_ser   = pin_ser;
+  _m_srclk = pin_srclk;
+  _m_rclk  = pin_rclk;
 
   pinMode(_m_ser,   OUTPUT);
   pinMode(_m_srclk, OUTPUT);
   pinMode(_m_rclk,  OUTPUT);
   digitalWrite(_m_rclk, LOW);
-
 }
 
 void serial_595_lcd::port_write() {

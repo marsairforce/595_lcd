@@ -1,7 +1,8 @@
 
-#ifndef _Serial_LCD_h_
-#define _Serial_LCD_h_
+#ifndef _LCD_h_
+#define _LCD_h_
 
+#include "Arduino.h"
 #include <inttypes.h>
 
 // commands
@@ -69,11 +70,11 @@
  */
 struct lcd_screen_buffer {
   char buf[ LCD_DRAM_MAX_COLUMN * LCD_DRAM_MAX_ROW + 1]; // +1 for the null terminator
-  byte cursor; // the index into the DRAM buffer where the cursor is
+  uint8_t cursor; // the index into the DRAM buffer where the cursor is
 
   // bit fields
-  byte cursor_visible : 1;
-  byte cursor_blink : 1;
+  uint8_t cursor_visible : 1;
+  uint8_t cursor_blink : 1;
 public:
   void clear_screen();
   void puts(char *str);
@@ -81,26 +82,80 @@ public:
 };
 
 /**
- * A class compatible with the Arduino LiquidCrystal library.
+ * A class compatible with the Arduino LiquidCrystal library interface.
+ * Specific implementations (I2C, 595 SPI, Parallel) can extend this.
  */
-class Serial_LCD {
+class HD44780_LCD {
+  protected:
+    uint8_t _m_cols = 20;
+    uint8_t _m_rows = 4;
 
-  void begin(uint8_t cols, uint8_t rows, uint8_t) charsize = LCD_5x8DOTS);
+  public:
+  void begin(uint8_t cols, uint8_t rows, uint8_t charsize = LCD_5x8DOTS);
+
+  void clear();
+  void home();
+
+  void noDisplay();
+  void display();
+  void noBlink();
+  void blink();
+  void noCursor();
+  void cursor();
+  void scrollDisplayLeft();
+  void scrollDisplayRight();
+  void leftToRight();
+  void rightToLeft();
+  void autoscroll();
+  void noAutoscroll();
+  virtual void setBacklight(uint8_t status) = 0;
+  void createChar(uint8_t, uint8_t[]);
+  virtual size_t write(uint8_t) = 0;
+  void setCursor(uint8_t, uint8_t); 
+
+  // sends a control command to the LCD
+  void command(uint8_t);
+
+  protected:
+  uint8_t _displayfunction;
+  uint8_t _displaycontrol;
+  uint8_t _displaymode;  
+  uint8_t _numrows;
+  uint8_t _currrow;
+
+  // This is going to be the interface specific method to communicate to the LCD
+  virtual void send(uint8_t value, boolean mode) = 0;
+};
+
+
+class Parallel_4bit_lcd : public HD44780_LCD, public Print {
+  public:
+  Parallel_4bit_lcd(uint8_t rs, uint8_t enable, uint8_t d0, uint8_t d1, uint8_t d2, uint8_t d3, uint8_t backlight);
+  virtual void setBacklight(uint8_t status);
+  virtual size_t write(uint8_t); // for Print class
+
+  private:
+    uint8_t _rs_pin; // LOW: command.  HIGH: character.
+    uint8_t _enable_pin; // activated by a HIGH pulse.
+    uint8_t _data_pins[4];
+    uint8_t _backlight_pin;
+  virtual void send(uint8_t value, boolean mode);
+  void write4bits(uint8_t);
+  void pulseEnable();
+
 };
 
 /**
  * This structure represents a LCD display as it is connected behind a 74HC595 shift register.
  * Fields then store the specific digital IO pin numbers, a byte register for the value on the shift register.
  */
-struct serial_595_lcd : public Serial_LCD {
+struct serial_595_lcd : public HD44780_LCD {
   private:
-    int _m_ser;        // the pin number on the Arduino that connects to SER (pin 14 of the 74HC595)
-    int _m_srclk;      // the pin number on the Arduino that connects to the SRCLK (pin 11 on the 74HC595)
-    int _m_rclk;       // the pin number on the Arduino that connects to the RCLK (pin 12 on the 74HC595)
-    int _m_cols = 20;
-    int _m_rows = 4;
+    uint8_t _m_ser;        // the pin number on the Arduino that connects to SER (pin 14 of the 74HC595)
+    uint8_t _m_srclk;      // the pin number on the Arduino that connects to the SRCLK (pin 11 on the 74HC595)
+    uint8_t _m_rclk;       // the pin number on the Arduino that connects to the RCLK (pin 12 on the 74HC595)
 
-    volatile unsigned int _m_data;  // the byte value representing the pin state on the 74HC595
+    volatile uint8_t _m_data;  // the byte value representing the pin state on the 74HC595
 
     /**
     * Performs the signalling required to write to a LCD port
@@ -121,7 +176,7 @@ struct serial_595_lcd : public Serial_LCD {
 
   public:
 
-    serial_lcd(int pin_ser, int pin_srclk, int pin_rclk);
+    serial_595_lcd(uint8_t pin_ser, uint8_t pin_srclk, uint8_t pin_rclk);
 
     /**
      * Perform the initialization of the LCD following power on state.

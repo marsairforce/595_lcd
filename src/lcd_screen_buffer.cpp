@@ -1,6 +1,6 @@
 // member functions for lcd_screen_buffer
 
-#include "serial_595_lcd.h"
+#include "LCD.h"
 #include "bit_macros.h"
 #include <Arduino.h>
 
