@@ -92,7 +92,7 @@ class HD44780_LCD {
     uint8_t _m_rows = 4;
 
   public:
-  void begin(uint8_t cols, uint8_t rows, uint8_t charsize = LCD_5x8DOTS);
+  virtual void begin(uint8_t cols, uint8_t rows, uint8_t charsize = LCD_5x8DOTS);
 
   void clear();
   void home();
@@ -112,7 +112,7 @@ class HD44780_LCD {
   virtual void setBacklight(uint8_t status) = 0;
   void createChar(uint8_t, uint8_t[]);
   virtual size_t write(uint8_t) = 0;
-  void setCursor(uint8_t, uint8_t); 
+  void setCursor(uint8_t, uint8_t);
 
   // sends a control command to the LCD
   void command(uint8_t);
@@ -120,12 +120,14 @@ class HD44780_LCD {
   private:
   uint8_t _displayfunction;
   uint8_t _displaycontrol;
-  uint8_t _displaymode;  
+  uint8_t _displaymode;
   uint8_t _numrows;
   uint8_t _currrow;
 
   // This is going to be the interface specific method to communicate to the LCD
   virtual void send(uint8_t value, boolean mode) = 0;
+  virtual void write4bits(uint8_t);
+
 };
 
 
@@ -142,7 +144,7 @@ class Parallel_4bit_lcd : public HD44780_LCD, public Print {
   uint8_t _backlight_pin;
 
   virtual void send(uint8_t value, boolean mode);
-  void write4bits(uint8_t);
+  virtual void write4bits(uint8_t);
   void pulseEnable();
 
 };
@@ -150,6 +152,7 @@ class Parallel_4bit_lcd : public HD44780_LCD, public Print {
 class Adafruit_I2C_lcd : public HD44780_LCD, public Print {
   public:
   Adafruit_I2C_lcd(uint8_t i2cAddr);
+  virtual void begin(uint8_t cols, uint8_t rows, uint8_t charsize = LCD_5x8DOTS);
   virtual void setBacklight(uint8_t status);
   virtual size_t write(uint8_t); // for Print class
 
@@ -157,8 +160,13 @@ class Adafruit_I2C_lcd : public HD44780_LCD, public Print {
   uint8_t _i2cAddr;
   Adafruit_MCP23008 _i2c;
 
+  uint8_t _rs_pin; // LOW: command.  HIGH: character.
+  uint8_t _enable_pin; // activated by a HIGH pulse.
+  uint8_t _data_pins[4];
+  uint8_t _backlight_pin;
+
   virtual void send(uint8_t value, boolean mode);
-  void write4bits(uint8_t);
+  virtual void write4bits(uint8_t);
 };
 
 /**
@@ -281,7 +289,7 @@ struct serial_595_lcd : public HD44780_LCD {
     uint8_t _m_srclk;      // the pin number on the Arduino that connects to the SRCLK (pin 11 on the 74HC595)
     uint8_t _m_rclk;       // the pin number on the Arduino that connects to the RCLK (pin 12 on the 74HC595)
 
-    volatile uint8_t _m_data;  // the byte value representing the pin state on the 74HC595    
+    volatile uint8_t _m_data;  // the byte value representing the pin state on the 74HC595
 };
 
 

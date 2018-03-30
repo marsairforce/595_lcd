@@ -2,46 +2,68 @@
 #include <Arduino.h>
 
 void HD44780_LCD::begin(uint8_t cols, uint8_t rows, uint8_t dotsize) {
-    // SEE PAGE 45/46 FOR INITIALIZATION SPECIFICATION!
-    // according to datasheet, we need at least 40ms after power rises above 2.7V
-    // before sending commands. Arduino can turn on way befer 4.5V so we'll wait 50
-    delayMicroseconds(50000); 
-    // Now we pull both RS and R/W low to begin commands
-    
-    _numrows = rows;
-    _currrow = 0;
-
     _displayfunction = LCD_4BITMODE | LCD_1LINE | LCD_5x8DOTS;
 
     if (rows > 1) {
         _displayfunction |= LCD_2LINE;
     }
 
+    _numrows = rows;
+    _currrow = 0;
+
     // for some 1 line displays you can select a 10 pixel high font
     if ((dotsize != 0) && (rows == 1)) {
         _displayfunction |= LCD_5x10DOTS;
     }
 
-    // put the LCD into 4 bit mode
-    // this is according to the hitachi HD44780 datasheet
-    // page 45 figure 23
+    // SEE PAGE 45/46 FOR INITIALIZATION SPECIFICATION!
+    // according to datasheet, we need at least 40ms after power rises above 2.7V
+    // before sending commands. Arduino can turn on way befer 4.5V so we'll wait 50
+    delayMicroseconds(50000);
+    // Now we pull both RS and R/W low to begin commands
 
-    // Send function set command sequence
-    command(LCD_FUNCTIONSET | _displayfunction);
-    delayMicroseconds(4500);  // wait more than 4.1ms
 
-    // second try
-    command(LCD_FUNCTIONSET | _displayfunction);
-    delayMicroseconds(150);
+    //put the LCD into 4 bit or 8 bit mode
+    if (! (_displayfunction & LCD_8BITMODE)) {
+      // this is according to the hitachi HD44780 datasheet
+      // figure 24, pg 46
 
-    // third go
-    command(LCD_FUNCTIONSET | _displayfunction);
+      // we start in 8bit mode, try to set 4 bit mode
+      write4bits(0x03);
+      delayMicroseconds(4500); // wait min 4.1ms
+
+      // second try
+      write4bits(0x03);
+      delayMicroseconds(4500); // wait min 4.1ms
+
+      // third go!
+      write4bits(0x03);
+      delayMicroseconds(150);
+
+      // finally, set to 4-bit interface
+      write4bits(0x02);
+    } else {
+      // For 8 bit interface. We currently don't have this, but I left this here for documentation.
+      // this is according to the hitachi HD44780 datasheet
+      // page 45 figure 23
+
+      // Send function set command sequence
+      command(LCD_FUNCTIONSET | _displayfunction);
+      delayMicroseconds(4500);  // wait more than 4.1ms
+
+      // second try
+      command(LCD_FUNCTIONSET | _displayfunction);
+      delayMicroseconds(150);
+
+      // third go
+      command(LCD_FUNCTIONSET | _displayfunction);
+    }
 
     // finally, set # lines, font size, etc.
-    command(LCD_FUNCTIONSET | _displayfunction);  
+    command(LCD_FUNCTIONSET | _displayfunction);
 
     // turn the display on with no cursor or blinking default
-    _displaycontrol = LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKOFF;  
+    _displaycontrol = LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKOFF;
     display();
 
     // clear it off
@@ -51,7 +73,7 @@ void HD44780_LCD::begin(uint8_t cols, uint8_t rows, uint8_t dotsize) {
     _displaymode = LCD_ENTRYLEFT | LCD_ENTRYSHIFTDECREMENT;
 
     // set the entry mode
-    command(LCD_ENTRYMODESET | _displaymode);    
+    command(LCD_ENTRYMODESET | _displaymode);
 }
 
 /********** high level commands, for the user! */
@@ -73,7 +95,7 @@ void HD44780_LCD::setCursor(uint8_t col, uint8_t row)
   if ( row > _numrows ) {
     row = _numrows-1;    // we count rows starting w/0
   }
-  
+
   command(LCD_SETDDRAMADDR | (col + row_offsets[row]));
 }
 
