@@ -109,8 +109,8 @@ class Parallel_4bit_lcd : public HD44780_LCD, public Print {
   virtual void send(uint8_t value, boolean mode);
   virtual void write4bits(uint8_t);
   void pulseEnable();
-
 };
+
 
 class Adafruit_I2C_lcd : public HD44780_LCD, public Print {
   public:
@@ -126,6 +126,7 @@ class Adafruit_I2C_lcd : public HD44780_LCD, public Print {
   virtual void send(uint8_t value, boolean mode);
   virtual void write4bits(uint8_t);
 };
+
 
 class PCF8574_lcd : public HD44780_LCD, public Print {
   public:
@@ -158,44 +159,39 @@ class PCF8574_lcd : public HD44780_LCD, public Print {
   void write2Wire();
 };
 
-#define LCD_E           0x10
-#define LCD_RS          0x20
-#define LCD_BACKLIGHT   0x40
-#define LCD_POWER       0x80
-#define LCD_DATA        0x0F
 /**
  * This structure represents a LCD display as it is connected behind a 74HC595 shift register.
  * Fields then store the specific digital IO pin numbers, a byte register for the value on the shift register.
  */
-struct serial_595_lcd : public HD44780_LCD {
-    /**
-    * Performs the signalling required to write to a LCD port
-    * Write the raw data to the LCD port shift register.
-    */
-    void port_write();
+class Serial_595_lcd : public HD44780_LCD, public Print {
+  public:
+
+    Serial_595_lcd(uint8_t pin_ser, uint8_t pin_srclk, uint8_t pin_rclk);
+    virtual void begin(uint8_t cols, uint8_t rows, uint8_t charsize = LCD_5x8DOTS);
+    virtual void setBacklight(uint8_t status);
+    virtual size_t write(uint8_t); // for Print class
+
     void set_e();
     void clear_e();
     void toggle_e();
+
     /**
     * writes 4 bits. Value in loser 4 bits.
+    * @Deprecated, should be write4bits
     */
-    void write_nibble(unsigned char data);
+    //void write_nibble(uint8_t data);
 
-    void write_byte(unsigned char RS, unsigned char data);
+    // this is now send()
+    //void write_byte(uint8_t RS, uint8_t data);
 
     void reset_sequence();
 
-  public:
-
-    serial_595_lcd(uint8_t pin_ser, uint8_t pin_srclk, uint8_t pin_rclk);
 
     /**
      * Perform the initialization of the LCD following power on state.
      * See the data sheets. There is a few magic bytes of chatter we need to do, and a timing sequence that is also magic.
      */
     void initialize();
-
-    void set_size(int cols, int rows);
 
     /**
      * Set DDRAM address in address counter
@@ -217,59 +213,18 @@ struct serial_595_lcd : public HD44780_LCD {
     void off();
 
     void power_on();
-
     void power_off();
-
-    /**
-     * Turn the backlight LED on
-     */
     void backlight_on();
-
-    /**
-     * Turn the backlight LED off
-     */
     void backlight_off();
-
-    /**
-     * Toggle the state of the backlight
-     */
     void toggle_backlight();
 
-    /**
-     * Set DDRAM address to "00H" from AC and return cursor to its original position if shifted.
-     * The contents of DDRAM are not changed.
-     * This function takes 1.52ms
-     */
-    void home();
 
-    /**
-     * The devices provide a 7 bit DRAM address
-     * Internally there are 40 character columns, even if the display does not physically have this many columns
-     * The row offsets are not consecutive starting points.
-     * e.g. for 40 characters, this only uses 0x00-0x27 (0-39)for the first line
-     * but the second line in the dram address starts at 0x40-0x67
-     * what about those 25 (0x19) bytes from 0x28-0x39?
-     *
-     * To make it more complicated, 4 line display modules that have less than 40 characters per line
-     * e.g. like these 20x4 modles I have http://www.newhavendisplay.com/specs/NHD-0420DZ-NSW-BBW.pdf
-     * use the not visible DRAM address positions from line 1 are mapped to display line 3.
-     * I guess this means we can not do the scroll display
-     *
-     * The set dram address command is 0x80, plus the memory offset.
-     * so we want to convert the input of (x,y) to the linear value
-     * that satisfies this mess.
-     */
     void gotoxy(unsigned char x, unsigned char y);
 
     /**
      * Write a string to the LCD at the current memory location.
      */
     void puts(char *str);
-
-    /**
-     * Clear the screen
-     */
-    void clear();
 
     /**
      * Causes the contents of the screen to be displayed onto the LCD.
@@ -283,8 +238,28 @@ struct serial_595_lcd : public HD44780_LCD {
     uint8_t _m_srclk;      // the pin number on the Arduino that connects to the SRCLK (pin 11 on the 74HC595)
     uint8_t _m_rclk;       // the pin number on the Arduino that connects to the RCLK (pin 12 on the 74HC595)
 
-    volatile uint8_t _m_data;  // the byte value representing the pin state on the 74HC595
-};
+    // the byte value representing the pin state on the 74HC595
+    // mapped into the fields LSB first
+    union {
+      struct {
+        uint8_t data:4;       // 0x0F D0..D3 to the LCD
+        uint8_t e:1;          // 0x10
+        uint8_t rs:1;         // 0x20
+        uint8_t backlight:1;  // 0x40
+        uint8_t power:1;      // 0x80
+      } field;
+      uint8_t raw;
+    } _data;
 
+    virtual void send(uint8_t value, boolean mode);
+    virtual void write4bits(uint8_t);
+
+    /**
+    * Performs the signalling required to write to a LCD port
+    * Write the raw data to the LCD port shift register.
+    */
+    void port_write();
+
+};
 
 #endif

@@ -10,10 +10,10 @@
 #define PIN_RCLK      7
 
 #include "LCD.h"
-serial_595_lcd lcd(PIN_SER, PIN_SRCLK, PIN_RCLK);
+Serial_595_lcd lcd(PIN_SER, PIN_SRCLK, PIN_RCLK);
 
 void setup() {
-    lcd.on();
+    lcd.begin(20,2);
 }
 
 int offset = 0;
@@ -29,8 +29,8 @@ void loop() {
   }
 
   lcd.clear();
-  lcd.gotoxy(offset, 1);
-  lcd.puts(msg);
+  lcd.setCursor(offset, 1);
+  lcd.print(msg);
   offset += dir;
 
   delay(500);
