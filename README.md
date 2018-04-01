@@ -13,12 +13,6 @@ While learning and figuring things out, I found the following other LCD library 
   * Another library here: [LiquidCrystal_PCF8574](https://github.com/mathertel/LiquidCrystal_PCF8574)
 
 
-I started to have the general theory, that I would like the same software interface (using a display buffer), but to support the specific lcd backend technology.
-
-This facilitated extracting an interface of the functions that exist in each library and making a common parent class, that is implemented by each specific library. If there are any specific messaging needed that is.
-
-I chose to not subclass the Arduino LiquidCrystal class, since it has a bunch of fields that only make sense if you are parallel mode.  I guess really for completeness I should define a class to support 4 bit parallel mode here as well.
-
 A first attempt was to create a structure to hold the state for a given LCD
 ```
 struct serial_lcd {
@@ -28,12 +22,17 @@ struct serial_lcd {
     volatile int data;  // the byte value representing the pin state on the 74HC595
 };
 ```
-
-Then all the functions we had defined in the header require a pointer to this serial_lcd structure. This allows us to have more than one LCD attached to the Arduino and in use at the same time.
-
 This was based on some earlier work I had done to connect a LCD to a USB parallel interface. But it was not very compatible with the Aruduino libraries.
 
-So I rewrote it, to be of the same class packaging, using the same function names.
+
+I started to have the general theory, that I would like the same software interface (using a display buffer), but to support the specific lcd backend technology.
+
+This facilitated extracting an interface of the functions that exist in each Arduino library and making a common parent class, that is implemented by each specific library.
+If there are any specific messaging needed, this would have to be put into virtual functions and implemented by each class.
+
+I chose to not subclass the Arduino LiquidCrystal class, since it has a bunch of fields that only make sense if you are parallel mode. Though we ended up having all the functions that were in the LiquidCrystal class, plus additional ones we use for backlight, and power state controls.
+
+
 
 ## Supported Devices and modes
 * 4 bit parallel interface (e.g. an Arduino keypad LCD shield)
