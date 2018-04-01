@@ -130,61 +130,25 @@ https://github.com/marsairforce/595_lcd
 | Q0 | LCD VDD |
 
 This works out well, so that we can use shift out with the least significant bit first,
+
+Where a low low level port write is just digitalWrite and shiftOut opertions:
 ```
-shiftOut(lcd->pin_ser, lcd->pin_srclk, LSBFIRST, lcd->data);
-```
-so in our software if we wanted to write, e.g. a `0x03`, it will be the value on [D4..D7] as it should be.
-
-However, because the data pins are the last bits (higher number) in the shift register,
-and the control pins are also in this 8 bit register, the lower down, the data when we view the waveform appears backwards.
-![timing diagram](doc/signal_timings.png)
-
-Where we can see in the frame ther, the `3B` and then '3C' value, corresponds to
-the activity of writing the value `0x0C` to the display, where we have the `E` pin first high,
-and then low.
-
-The timing diagram above only shows one nibble, or half of a character or command sequence.
-
-Because we have a pin for the power to the LCD, we can use software to turn the display off entirely. This is a feature that is not present on the other Serial LCD backpacks that I have found so far.
-
-In the software we use a union of a struct of bit fields. This allows us to express a variable directly without needing clutter our code up with inline bit shifting operators everywhere.
-
-### A Use case: Clearing the screen
-
-Lets have a look at the operations that are involved by a single command.
-
-![clear screen timing](doc/clear_screen_command.png)
-
-The library provides  a function to clear the display, `void lcd_clear(serial_lcd *lcd)`:
-```
-void lcd_clear(serial_lcd *lcd) {
-  lcd_write(lcd, 0, 0x01);
-  delay(2);
+void Serial_595_lcd::port_write() {
+  shiftOut(_m_ser, _m_srclk, LSBFIRST, _data.raw);
+  digitalWrite(_m_rclk, HIGH);
+  digitalWrite(_m_ser, LOW);
+  digitalWrite(_m_rclk, LOW);
 }
 ```
 
-Where lcd_write invokes two nibble write operations. But we have refactored the lcd_write_nibble to remove one cycle of loading the shift register.
-So this is now done in 5 cycles. The original was 8.
-
-
-(Where this low level port write is just digitalWrite and shiftOut opertions):
-```
-void lcd_port_write(serial_lcd *lcd) {
-  shiftOut(lcd->pin_ser, lcd->pin_srclk, LSBFIRST, lcd->data);
-  digitalWrite(lcd->pin_rclk, HIGH);
-  digitalWrite(lcd->pin_rclk, LOW);
-}
-```
 ### Why use a 74HC595
-I have and appreciate the I2C LCD backpack. But sometimes I am playing with ATTiny devices,
-or something else that does ot have an I2C. I guess I could use the SPI mode on that.
-
-But then sometimes I don't feel like spending $10 USD, which when converted to CDN, plus taxes and shipping
+I have and appreciate the I2C LCD backpack. But then sometimes I don't feel like spending $10 USD, which when converted to CDN, plus taxes and shipping
 usually comes out to about double.
 
 There are a lot of low price LCD backpacks on Amazon, or AliExpress.
-But then I am impatient and don't have them at the moment when I feel like wiring something up on a breadboard,
-and it turns out I do have a bunch of 74HC595's. So there is that.
+But then I am impatient and don't have them at the moment when I feel like wiring something up on a breadboard, rr I don't have I2C support on what I am working on.
+
+It turns out I do have a bunch of 74HC595's. So there is that.
 
 I also thought it is a good learning experience to build something yourself sometimes.
 
@@ -200,7 +164,9 @@ My board design is on OSHPark here: https://oshpark.com/projects/P1p8G9Nj
 
 ## PCF8574
 You can get these on Ali Epress in a bunch of them in a lot for a couple dollars a piece.
+
 ![PCF8574 module](doc/PCF8574_module.png)
+
 Really it is cheaper than me buying just the PCF8574 device. And then having to also buy the other components, have a PCB made. I don't know how they do it.
 
 This device works a bit like a 74HC595 from the software perspective. There are no elaborate pin mappings or registers. You just write 8 bits to it and that gets put to the output pins.
@@ -229,6 +195,45 @@ It also has a 74HC595 for the SPI mode. Which is really two different interfaces
 The more I looked into this the more humbled I have become, as it is such a well designed and constructed little device.
 
 I don't mean to sound like an advertisement, it is just a neat device. My only complaint is I would want a way to power off the LCD hardware using software and to control the contrast. Then again no other products do this either I guess.
+
+## Adafruit LCD Backpack in SPI mode
+When I started this project, I didn't realize the Adafruit LCD backpack also uses a 74HC595 for its SPI mode. Also, neat to know that what I was doing is actually called "SPI".
+
+But now I also feel a little less that I actually invented something new here. Nope, everything I think of has already been done. Usually done better than how I did it as well. This is why I am humbed by this Adafruit LCD backpack device.
+
+Thye seem to have a different pin out than I used.
+
+| 74HC595  | Display  |
+|----------|:---------|
+| Q0 | NC |
+| Q1 | D7 |
+| Q2 | D6 |
+| Q3 | D5 |
+| Q4 | D4 |
+| Q5 | E |
+| Q6 | RS |
+| Q7 | Backlight |
+
+Of course I found the documentation after experimental analysis: https://learn.adafruit.com/assets/35681
+
+The original Adafruit library approach was somewhat inefficient compared to my approach. Where they use an abstract `digitalWrite()` function to individually set a pin value onto the 74HC595. Instead of just doing one operation of serial writing a buffer value.
+
+My approach is to set up a structure of the bit field values tht maps to a byte value as well, so then we just send this out with one serial write operation.
+
+```
+  union {
+     struct {
+       uint8_t unused:1      // P0
+       uint8_t rs:1;         // P0
+       uint8_t en:1;         // P1
+       uint8_t data:4;       // P2..P5
+     uint8_t backlight:1;    // P7
+     } field;
+     uint8_t raw;
+  } _data;
+```
+
+This should allow a single `port_write()` operation to work a bit faster than how it was before anwyay.
 
 ## Example Sketches
 Have a look in the examples folder for sample use of the library.

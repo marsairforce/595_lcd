@@ -194,10 +194,11 @@ class Adafruit_SPI_lcd : public HD44780_LCD {
 
   // union {
   //   struct {
-  //   uint8_t backlight:1;    // P7
-  //     uint8_t data:4;       // P2..P6
-  //     uint8_t en:1;         // P1
+  //     uint8_t unused:1      // P0
   //     uint8_t rs:1;         // P0
+  //     uint8_t en:1;         // P1
+  //     uint8_t data:4;       // P2..P5
+  //   uint8_t backlight:1;    // P7
   //   } field;
   //   uint8_t raw;
   // } _data;
