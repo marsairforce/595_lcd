@@ -89,28 +89,66 @@ class HD44780_LCD : public Print {
  */
 class lcd_screen_buffer : public Print {
   public:
-  lcd_screen_buffer(HD44780_LCD *lcd);
+  lcd_screen_buffer(HD44780_LCD *lcd); // use screen buffer the same size as the LCD
+  ~lcd_screen_buffer();
+  void begin(uint8_t cols = 0, uint8_t rows = 0);  // optionally specify our own virtual screen size. If zero, then use the LCD display size.
+
   void clear();
+  // will write character into the current virtual cursor position into the virtual buffer.
   virtual size_t write(uint8_t);
-  void noBlink();
-  void blink();
-  void noCursor();
-  void cursor();
-  void setCursor(uint8_t row, uint8_t col);
-  uint8_t getCursor() { return _cursor; }
+  void setCursor(uint8_t col, uint8_t row) {
+    _vcursor_x = col;
+    _vcursor_y = row;
+  }
+
+  // the position of the cursor on the display itself.
+  void setHCursor(uint8_t col, uint8_t row) {
+    _cursor_x = col;
+    _cursor_y = row;
+  }
+  uint8_t getHCursorX() { return _cursor_x; }
+  uint8_t getHCursorY() { return _cursor_y; }
+
+  // sets the offset of the virtual buffer to be presented to the hardware viewport
+  void setWindow(uint8_t col, uint8_t row) {
+    _win_x = col;
+    _win_y = row;
+  }
+  uint8_t getWindowX() { return _win_x; }
+  uint8_t getWindowY() { return _win_y; }
+
+  // the state we should set the hardware cursor on the device.
+  void noBlink() { _cursor_blink = 0; }
+  void blink() { _cursor_blink = 1; }
+  void noCursor() { _cursor_visible = 0; }
+  void cursor() { _cursor_visible = 1; }
+
   void writeToLcd();
 
   private:
   HD44780_LCD *_lcd;
   char *_buffer; //[ LCD_DRAM_MAX_COLUMN * LCD_DRAM_MAX_ROW + 1]; // +1 for the null terminator
-  uint8_t _rows;
-  uint8_t _cols;
+  uint8_t _rows; // the virtual viewport rows
+  uint8_t _cols; // the virtual viewport columns
   uint8_t _size;
-  uint8_t _cursor; // the index into the DRAM buffer where the cursor is
+
+  // the virtual viewport coordinates that map to the physical screen.
+  uint8_t _win_x;
+  uint8_t _win_y;
+
+  uint8_t _cursor_x;
+  uint8_t _cursor_y;
+  //uint8_t _cursor; // the index into the DRAM buffer where the cursor is
+
+  // the current position for character entry into the virtual buffer space.
+  uint8_t _vcursor_x;
+  uint8_t _vcursor_y;
 
   // bit fields
   uint8_t _cursor_visible : 1;
   uint8_t _cursor_blink : 1;
+
+  void printToBuffer(const uint8_t x, const uint8_t y, const char *s);
 };
 
 
@@ -140,6 +178,35 @@ class Parallel_4bit_lcd : public HD44780_LCD {
   void pulseEnable();
 };
 
+
+/* http://www.thomasclausen.net/en/walking-through-the-1602-lcd-keypad-shield-for-arduino/
+ *
+ * LCD Module | Arduino Pin
+ * D7 (3)       7
+ * D6 (2)       6
+ * D5 (1)       5
+ * D4 (0)       4
+ * RS           8
+ * E            9
+ * (backlight?) 10
+ *
+ * A0 : buttons input.
+ */
+#define btnRIGHT 0
+#define btnUP 1
+#define btnDOWN 2
+#define btnLEFT 3
+#define btnSELECT 4
+#define btnNONE 5
+#define btnUNKNOWN 6
+
+class LCDKeypadShield {
+    public:
+    HD44780_LCD *lcd;
+
+    int readkeypad();
+    LCDKeypadShield();
+};
 
 class Adafruit_I2C_lcd : public HD44780_LCD {
   public:
