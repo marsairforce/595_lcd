@@ -15,7 +15,7 @@
  * A class compatible with the Arduino LiquidCrystal library interface.
  * Specific implementations (I2C, 595 SPI, Parallel) can extend this.
  */
-class HD44780_LCD {
+class HD44780_LCD : public Print {
   public:
   virtual void begin(uint8_t cols, uint8_t rows, uint8_t charsize = LCD_5x8DOTS);
 
@@ -115,7 +115,7 @@ class lcd_screen_buffer : public Print {
 
 
 
-class Parallel_4bit_lcd : public HD44780_LCD, public Print {
+class Parallel_4bit_lcd : public HD44780_LCD {
   public:
   Parallel_4bit_lcd(uint8_t rs, uint8_t enable, uint8_t d0, uint8_t d1, uint8_t d2, uint8_t d3, uint8_t backlight = 0);
   virtual void setBacklight(uint8_t status);
@@ -141,7 +141,7 @@ class Parallel_4bit_lcd : public HD44780_LCD, public Print {
 };
 
 
-class Adafruit_I2C_lcd : public HD44780_LCD, public Print {
+class Adafruit_I2C_lcd : public HD44780_LCD {
   public:
   Adafruit_I2C_lcd(uint8_t i2cAddr);
   virtual void begin(uint8_t cols, uint8_t rows, uint8_t charsize = LCD_5x8DOTS);
@@ -163,7 +163,7 @@ class Adafruit_I2C_lcd : public HD44780_LCD, public Print {
   virtual void write4bits(uint8_t);
 };
 
-class Adafruit_SPI_lcd : public HD44780_LCD, public Print {
+class Adafruit_SPI_lcd : public HD44780_LCD {
   public:
   Adafruit_SPI_lcd(uint8_t data, uint8_t clock, uint8_t latch);
   virtual void begin(uint8_t cols, uint8_t rows, uint8_t charsize = LCD_5x8DOTS);
@@ -212,7 +212,7 @@ class Adafruit_SPI_lcd : public HD44780_LCD, public Print {
   void pulseEnable();
 };
 
-class PCF8574_lcd : public HD44780_LCD, public Print {
+class PCF8574_lcd : public HD44780_LCD {
   public:
   PCF8574_lcd(uint8_t addr);
   virtual void begin(uint8_t cols, uint8_t rows, uint8_t charsize = LCD_5x8DOTS);
@@ -246,7 +246,7 @@ class PCF8574_lcd : public HD44780_LCD, public Print {
  * This structure represents a LCD display as it is connected behind a 74HC595 shift register.
  * Fields then store the specific digital IO pin numbers, a byte register for the value on the shift register.
  */
-class Serial_595_lcd : public HD44780_LCD, public Print {
+class Serial_595_lcd : public HD44780_LCD {
   public:
 
     Serial_595_lcd(uint8_t pin_ser, uint8_t pin_srclk, uint8_t pin_rclk);
