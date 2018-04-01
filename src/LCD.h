@@ -230,6 +230,7 @@ class Adafruit_I2C_lcd : public HD44780_LCD {
   virtual void write4bits(uint8_t);
 };
 
+//#define ADAFRUIT_SPI_USE_FIELD_STRUCT true
 class Adafruit_SPI_lcd : public HD44780_LCD {
   public:
   Adafruit_SPI_lcd(uint8_t data, uint8_t clock, uint8_t latch);
@@ -259,25 +260,26 @@ class Adafruit_SPI_lcd : public HD44780_LCD {
   // We can't conveniently map to a struct here, because I think the data pins are backwards.
   // And they serialize MSBFIRST.
 
-  // union {
-  //   struct {
-  //     uint8_t unused:1      // P0
-  //     uint8_t rs:1;         // P0
-  //     uint8_t en:1;         // P1
-  //     uint8_t data:4;       // P2..P5
-  //   uint8_t backlight:1;    // P7
-  //   } field;
-  //   uint8_t raw;
-  // } _data;
-  // void port_write();
-
-  //
+#ifdef ADAFRUIT_SPI_USE_FIELD_STRUCT
+  union {
+     struct {
+       uint8_t unused:1;      // P0
+       uint8_t rs:1;          // P1
+       uint8_t en:1;          // P2
+       uint8_t data:4;        // P3..P6
+       uint8_t backlight:1;   // P7
+     } field;
+     uint8_t raw;
+   } _data;
+   void port_write();
+#else
   uint8_t _SPIbuff;
   uint8_t _rs_pin;
   uint8_t _enable_pin;
   uint8_t _data_pins[4];
   void _digitalWrite(uint8_t p, uint8_t d);
   void pulseEnable();
+#endif
 };
 
 class PCF8574_lcd : public HD44780_LCD {
