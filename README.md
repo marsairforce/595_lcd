@@ -224,8 +224,10 @@ Mapping to the LCD pins on these devices appears to be as follows:
 | P7 | D7 (D3) |
 
 
-## Adafruit I2C LCD Backpack
-This product has its own page. They do very well with it. It supports both SPI and I2C modes of operation. It is a generic IO expander, pins can be set to be individually inputs or outputs, like in the Aruino. It is really more qualified than it needs to be for driving an LCD. Something to hack at with another project some time.
+## Adafruit I2C/SPI LCD Backpack
+This product has its own page. They do very well with it. It supports both SPI and I2C modes of operation. It has a MPC23008 a generic IO expander where, pins can be set to be individually inputs or outputs, like in the Aruino. It is really more qualified than it needs to be for driving an LCD.
+It also has a 74HC595 for the SPI mode. Which is really two different interfaces in one. And they provide good software library to drive both.
+The more I looked into this the more humbled I have become, as it is such a well designed and constructed little device.
 
 I don't mean to sound like an advertisement, it is just a neat device. My only complaint is I would want a way to power off the LCD hardware using software and to control the contrast. Then again no other products do this either I guess.
 

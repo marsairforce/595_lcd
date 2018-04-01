@@ -1,9 +1,12 @@
 # Serial 595 LCD Revisions
 
-## 2.0
+## 2.1
+
+## 2.0 (2018-03-31)
 * Removed the v1 API.
 * Created a general purpose abstract base LCD class. Allows for implementations of different kinds of hardware to use the same library features.
-* Added support for Adafruit I2C LCD Backpack.
+* Added support for Adafruit LCD Backpack, I2C mode.
+* Added support for Adafruit LCD Backpack, SPI mode.
 * Added support for PCF8574 I2C LCD Backack.
 * Added support for parallel mode LCDs. But only ironically. Because this is a serial LCD library of course.
 * Refactory out the need for bit macros library, favouring instead the union of struct of bit fields, which gives us a named reference to access the bit i a more convenient way that does not clutter the code.
