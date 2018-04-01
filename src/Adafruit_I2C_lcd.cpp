@@ -45,12 +45,17 @@ void Adafruit_I2C_lcd::begin(uint8_t cols, uint8_t rows, uint8_t charsize)
 }
 
 inline size_t Adafruit_I2C_lcd::write(uint8_t value) {
-  send(value, HIGH);
-  return 1;
+    send(value, HIGH);
+    return 1;
 }
 
 void Adafruit_I2C_lcd::setBacklight(uint8_t status) {
+    _data.field.backlight = status;
     _i2c.digitalWrite(ADAFRUIT_MPC_PIN_BACKLIGHT, status); // backlight is on pin 7
+}
+
+boolean Adafruit_I2C_lcd::isBacklight() {
+    return _data.field.backlight;
 }
 
 void Adafruit_I2C_lcd::send(uint8_t value, boolean mode) {
