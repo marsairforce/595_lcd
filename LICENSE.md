@@ -1,22 +1,3 @@
-= Serial shift register LCD Library for Arduino =
-
-The serial_595_lcd library provides the software interface to use a HD44780 type parallel LCD display
-through a 74HC595, so that only (3) digital output pins are required to control it.
-
-![schematic](doc/v1_schematic.png)
-
-This was inspired by those I2C or SPI LCD backpacks from Adafruit.
-
-Only here, well, we just use a 74HC595.
-
-The library requires (3) digital IO pins on your Arduino.
-
-There are some assumptions for how the LCD is connected to the 74HC595, see the
-schematic in the doc folder.
-
-For more information about this library please visit us at
-https://github.com/marsairforce/595_lcd
-
 == License ==
 
 Copyright (c) 2017 Travis Hein. All right reserved.

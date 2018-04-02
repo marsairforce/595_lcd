@@ -1,6 +1,7 @@
 /*
    - 20x4 LCD display, 4 bit mode, driven by 74HC595 shift register
-   The version 2 (current) of the API.
+
+   Demonstration of the screen buffer class.
 */
 
 
@@ -15,6 +16,7 @@ serial_lcd lcd(PIN_SER, PIN_SRCLK, PIN_RCLK);
 void setup() {
     lcd.on();
 }
+
 
 int offset = 0;
 int dir = +1;
@@ -32,6 +34,7 @@ void loop() {
   lcd.gotoxy(offset, 1);
   lcd.puts(msg);
   offset += dir;
+
 
   delay(500);
 
