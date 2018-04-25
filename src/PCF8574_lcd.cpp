@@ -1,11 +1,21 @@
 #include "LCD.h"
-#include <Arduino.h>
 #include <inttypes.h>
 #include "Print.h"
 #include <inttypes.h>
+
+#if defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) \
+    || defined(__AVR_ATtiny84__) || defined(__AVR_ATtiny25__) \
+    || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) \
+    || defined(__AVR_ATtiny2313__) || defined(__AVR_ATtiny4313__) \
+    || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__) \
+    || defined( __AVR_ATtiny261__ ) || defined( __AVR_ATtiny461__ ) \
+    || defined( __AVR_ATtiny861__ ) || defined(__AVR_ATtiny1634__)
+#include "USIWire.h"
+#else
 #include <Wire.h>
+#endif
 
-
+#include <Arduino.h>
 
 PCF8574_lcd::PCF8574_lcd(uint8_t addr)
 {

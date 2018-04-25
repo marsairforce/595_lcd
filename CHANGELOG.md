@@ -1,6 +1,7 @@
 # Serial 595 LCD Revisions
 
-## 2.1
+## 2.1 (2018-04-25)
+* Add support for USIWire library (https://github.com/puuu/USIWire ) so we use I2C on attiny devices.
 
 ## 2.0 (2018-03-31)
 * Removed the v1 API.

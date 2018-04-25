@@ -2,7 +2,6 @@
  * Demonstrates using a an I2C LCD backpack based on the PCF8574 device.
  */
 
-#include <Wire.h>
 #include <LCD.h>
 
 PCF8574_lcd lcd(0x27);  // set the LCD address to 0x27 for a 16 chars and 2 line display
