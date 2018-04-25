@@ -28,10 +28,6 @@ void Serial_595_lcd::setBacklight(uint8_t status) {
   port_write();
 }
 
-boolean Serial_595_lcd::isBacklight() {
-  return _data.field.backlight;
-}
-
 inline size_t Serial_595_lcd::write(uint8_t value) {
   send(value, HIGH);
   return 1;

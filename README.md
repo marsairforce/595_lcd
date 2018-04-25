@@ -239,3 +239,11 @@ This should allow a single `port_write()` operation to work a bit faster than ho
 Have a look in the examples folder for sample use of the library.
 There are different sketches for each supported hardware device.
 
+# Screen Buffer
+I became interested in using a double buffer with my LCD projects. Mostly because if you have a bunch of different screens for menus or different states of the modes of operation, it becomes a complicated mess of code to try to manage which stuff gets printed onto which display. You need to have a bunch of flag variables to suppress something being printed if it is not visible. but then storing the output of (e.g. a sensor reading) into some intermediate storage and then re drawing the screen when that state required the data to be displayed.
+
+What if we could just have something always write to its display screen (a virtual buffer) and then if that screen was active, just print that out to the LCD. Also. in practice it was found invoking the clear() or home() functions are very time expensive operations, relative to just having a buffer (even if it is all spaces) and rendering all of that onto the LCD.
+
+I started off looking at some other examples of this:
+* https://www.baldengineer.com/arduino-lcd-display-tips.html
+* http://tuttlem.github.io/2015/02/22/virtual-buffer-for-liquid-crystal-displays.html

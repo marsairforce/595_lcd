@@ -322,7 +322,7 @@ class Serial_595_lcd : public HD44780_LCD {
     Serial_595_lcd(uint8_t pin_ser, uint8_t pin_srclk, uint8_t pin_rclk);
     virtual void begin(uint8_t cols, uint8_t rows, uint8_t charsize = LCD_5x8DOTS);
     virtual void setBacklight(uint8_t status);
-    virtual boolean isBacklight();
+    virtual boolean isBacklight() {   return _data.field.backlight; }
     virtual size_t write(uint8_t); // for Print class
 
     /**
@@ -331,12 +331,23 @@ class Serial_595_lcd : public HD44780_LCD {
      * And then initializes the display.
      */
     void powerOn();
+
     /**
      * Turns off the LCD. Note here we need to turn off all the data and control inputs to the LCD,
      * since the LCD will usually be able to derive power from the input pins.
      */
     void powerOff();
 
+    boolean isOn() { return _data.field.power; }
+
+    void togglePower() {
+      if (isOn()) {
+        powerOff();
+      }
+      else {
+        powerOn();
+      }
+    }
 
     /**
      * Perform the initialization of the LCD following power on state.
