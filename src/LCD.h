@@ -102,20 +102,20 @@ class lcd_screen_buffer : public Print {
   }
 
   // the position of the cursor on the display itself.
-  void setHCursor(uint8_t col, uint8_t row) {
-    _cursor_x = col;
-    _cursor_y = row;
-  }
-  uint8_t getHCursorX() { return _cursor_x; }
-  uint8_t getHCursorY() { return _cursor_y; }
+  // void setHCursor(uint8_t col, uint8_t row) {
+  //   _cursor_x = col;
+  //   _cursor_y = row;
+  // }
+  // uint8_t getHCursorX() { return _cursor_x; }
+  // uint8_t getHCursorY() { return _cursor_y; }
 
   // sets the offset of the virtual buffer to be presented to the hardware viewport
-  void setWindow(uint8_t col, uint8_t row) {
-    _win_x = col;
-    _win_y = row;
-  }
-  uint8_t getWindowX() { return _win_x; }
-  uint8_t getWindowY() { return _win_y; }
+  // void setWindow(uint8_t col, uint8_t row) {
+  //   _win_x = col;
+  //   _win_y = row;
+  // }
+  // uint8_t getWindowX() { return _win_x; }
+  // uint8_t getWindowY() { return _win_y; }
 
   // the state we should set the hardware cursor on the device.
   void noBlink() { _cursor_blink = 0; }
@@ -127,17 +127,17 @@ class lcd_screen_buffer : public Print {
 
   private:
   HD44780_LCD *_lcd;
-  char *_buffer; //[ LCD_DRAM_MAX_COLUMN * LCD_DRAM_MAX_ROW + 1]; // +1 for the null terminator
-  uint8_t _rows; // the virtual viewport rows
-  uint8_t _cols; // the virtual viewport columns
-  uint8_t _size;
+  char _buffer[LCD_DRAM_MAX_COLUMN * LCD_DRAM_MAX_ROW]; // +1 for the null terminator
+  const uint8_t _size = LCD_DRAM_MAX_COLUMN * LCD_DRAM_MAX_ROW ;
+  const uint8_t _cols = 20; // the virtual viewport columns
+  const uint8_t _rows = 4;  // the virtual viewport rows
 
   // the virtual viewport coordinates that map to the physical screen.
-  uint8_t _win_x;
-  uint8_t _win_y;
+  // uint8_t _win_x;
+  // uint8_t _win_y;
 
-  uint8_t _cursor_x;
-  uint8_t _cursor_y;
+  // uint8_t _cursor_x;
+  // uint8_t _cursor_y;
   //uint8_t _cursor; // the index into the DRAM buffer where the cursor is
 
   // the current position for character entry into the virtual buffer space.
@@ -148,7 +148,7 @@ class lcd_screen_buffer : public Print {
   uint8_t _cursor_visible : 1;
   uint8_t _cursor_blink : 1;
 
-  void printToBuffer(const uint8_t x, const uint8_t y, const char *s);
+  //void printToBuffer(const uint8_t x, const uint8_t y, const char *s);
 };
 
 
